@@ -114,20 +114,19 @@ func (s *server) state(c net.Conn, trame string) {
 
 func (s *server) runP(c net.Conn, id int) {
 	buf := make([]byte, 10)
-	c.Read(buf[:4])
-	if bytes.Compare(buf[0:3], []byte("NME")) != 0 {
-		fmt.Errorf("Invalid first connextion value")
+	c.Read(buf[:3])
+	if bytes.Compare(buf[:3], []byte("NME")) != 0 {
+		fmt.Errorf("Invalid first connexion value")
 		return
 	}
-	t := int(buf[3])
-	fmt.Println(t)
+
+	c.Read(buf[:1])
+	t := int(buf[0])
 	if t > 10 {
 		buf = make([]byte, t)
 	}
 	c.Read(buf[:t])
 	s.name[id] = string(buf[:t])
-	fmt.Println(string(buf))
-	fmt.Println(s.name[id])
 	s.set(c)
 	s.hum(c)
 	s.hme(c, id)
