@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"net"
 )
 
@@ -15,18 +16,13 @@ const (
 	ready
 )
 
-func main() {
-	var names [2]string
-	s := server{newMap(), names}
-	s.run()
-}
-
 type server struct {
 	*Map
 	name [2]string
 }
 
 func (s *server) run() {
+	log.Println("Starting tcp server")
 	l, err := net.Listen("tcp", ":5555")
 	defer l.Close()
 	if err != nil {
@@ -37,20 +33,22 @@ func (s *server) run() {
 	if err != nil {
 		panic(err.Error())
 	}
-	go s.runP(con1, 1)
+	log.Println("First player entered the game")
+	go s.runP(con1, 0)
 	// second player
 	con2, err := l.Accept()
 	if err != nil {
 		panic(err.Error())
 	}
-	go s.runP(con2, 2)
+	log.Println("second player entered the game")
+	go s.runP(con2, 1)
 }
 
 func (s *server) set(c net.Conn) {
 	msg := make([]byte, 5)
 	copy(msg, []byte("SET"))
-	msg[3] = byte(uint8(s.height))
-	msg[4] = byte(uint8(s.width))
+	msg[3] = byte(uint8(s.Rows))
+	msg[4] = byte(uint8(s.Columns))
 	c.Write(msg)
 }
 
@@ -73,11 +71,7 @@ func (s *server) hme(c net.Conn, id int) {
 	mon := s.cells[s.monster[id][0]]
 	msg[3] = byte(uint8(mon.x))
 	msg[4] = byte(uint8(mon.y))
-	for i, h := range s.humans {
-		hum := s.cells[h]
-		msg[4+2*i] = byte(uint8(hum.x))
-		msg[4+2*i+1] = byte(uint8(hum.y))
-	}
+	c.Write(msg)
 }
 
 func (s *server) state(c net.Conn, trame string) {
