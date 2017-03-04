@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 type state int
@@ -28,20 +29,57 @@ func (s *server) run() {
 	if err != nil {
 		panic(err.Error())
 	}
+
 	// first player
-	con1, err := l.Accept()
+	con0, err := l.Accept()
 	if err != nil {
 		panic(err.Error())
 	}
 	log.Println("First player entered the game")
-	go s.runP(con1, 0)
+	ch0 := make(chan bool, 1)
+	done0 := make(chan bool, 1)
+	go s.runP(con0, 0, ch0, done0)
+
 	// second player
-	con2, err := l.Accept()
+	con1, err := l.Accept()
 	if err != nil {
 		panic(err.Error())
 	}
-	log.Println("second player entered the game")
-	go s.runP(con2, 1)
+	log.Println("Second player entered the game")
+	ch1 := make(chan bool, 1)
+	done1 := make(chan bool, 1)
+	go s.runP(con1, 1, ch1, done1)
+
+	ch0 <- true
+	time.Sleep(10 * time.Second)
+}
+
+func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
+	buf := make([]byte, 10)
+	c.Read(buf[:3])
+	if bytes.Compare(buf[:3], []byte("NME")) != 0 {
+		fmt.Errorf("Invalid first connexion value")
+		return
+	}
+
+	c.Read(buf[:1])
+	t := int(buf[0])
+	if t > 10 {
+		buf = make([]byte, t)
+	}
+	c.Read(buf[:t])
+	s.name[id] = string(buf[:t])
+	s.set(c)
+	s.hum(c)
+	s.hme(c, id)
+	s.state(c, "MAP")
+	log.Printf("Initialisation finished for player %d", id)
+	<-ch
+	s.state(c, "UPD")
+	fmt.Println("state")
+	c.SetDeadline(time.Now().Add(10 * time.Second))
+	s.upd(c)
+	done <- true
 }
 
 func (s *server) set(c net.Conn) {
@@ -83,46 +121,29 @@ func (s *server) state(c net.Conn, trame string) {
 	// Send all humans data
 	for _, h := range s.humans {
 		hum := s.cells[h]
-		msg[4+2*i] = byte(uint8(hum.x))
-		msg[4+2*i+1] = byte(uint8(hum.y))
-		msg[4+2*i+2] = byte(uint8(hum.count))
+		msg[4+5*i] = byte(uint8(hum.x))
+		msg[4+5*i+1] = byte(uint8(hum.y))
+		msg[4+5*i+2] = byte(uint8(hum.count))
 		i++
 	}
 	// Send all vamp data
 	for _, m := range s.monster[1] {
 		mon := s.cells[m]
-		msg[4+2*i] = byte(uint8(mon.x))
-		msg[4+2*i+1] = byte(uint8(mon.y))
-		msg[4+2*i+3] = byte(uint8(mon.count))
+		msg[4+5*i] = byte(uint8(mon.x))
+		msg[4+5*i+1] = byte(uint8(mon.y))
+		msg[4+5*i+3] = byte(uint8(mon.count))
 		i++
 	}
 	// Send all wolf data
 	for _, m := range s.monster[0] {
 		mon := s.cells[m]
-		msg[4+2*i] = byte(uint8(mon.x))
-		msg[4+2*i+1] = byte(uint8(mon.y))
-		msg[4+2*i+4] = byte(uint8(mon.count))
+		msg[4+5*i] = byte(uint8(mon.x))
+		msg[4+5*i+1] = byte(uint8(mon.y))
+		msg[4+5*i+4] = byte(uint8(mon.count))
 		i++
 	}
+	c.Write(msg)
 }
 
-func (s *server) runP(c net.Conn, id int) {
-	buf := make([]byte, 10)
-	c.Read(buf[:3])
-	if bytes.Compare(buf[:3], []byte("NME")) != 0 {
-		fmt.Errorf("Invalid first connexion value")
-		return
-	}
-
-	c.Read(buf[:1])
-	t := int(buf[0])
-	if t > 10 {
-		buf = make([]byte, t)
-	}
-	c.Read(buf[:t])
-	s.name[id] = string(buf[:t])
-	s.set(c)
-	s.hum(c)
-	s.hme(c, id)
-	s.state(c, "MAP")
+func (s *server) upd(c net.Conn) {
 }
