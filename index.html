@@ -5,7 +5,7 @@
 	<script src="/static/vue.min.js"></script>
 	</head>
 	<body>
-	<div id="app">
+	<div id="grid">
 		<p>Welcome to twilight</p>
 		<div v-bind:style="dim">
 			<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -44,8 +44,8 @@
 		</div>
 	</div>
 	<script>
-		new Vue({
-		  el: '#app',
+		var grid = new Vue({
+		  el: '#grid',
 		  data: {
 			dim: {
 				width: 401 + 'px',
@@ -62,7 +62,25 @@
 			{X: 320, Y: 80, c: 5},
 			],
 		  }
-		})
+		});
+		(function poll(){
+			setTimeout(function(){
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						data = JSON.parse(this.responseText);
+						grid.dim.width = data.X + "px"
+						grid.dim.height = data.Y + "px"
+						grid.humans = data.Humans;
+						grid.vamps = data.Vamps;
+						grid.wolf  = data.Wolfs;
+						poll()
+					}
+				};
+				xhttp.open("GET", "/data", true);
+				xhttp.send();
+			}, 3000);
+		})();
 	</script>
 	</body>
 </html>

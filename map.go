@@ -28,14 +28,14 @@ var (
 
 type cell struct {
 	kind  specie
-	count int
+	Count int `json:"c"`
 	// Be careful with 0 indexing they don't correspond to actual position
-	x int
-	y int
+	X int `json:"X"`
+	Y int `json:"Y"`
 }
 
 func (c cell) IsEmpty() bool {
-	return c.count == 0
+	return c.Count == 0
 }
 
 type move struct {
@@ -101,9 +101,9 @@ func (m *Map) load(mapPath string) {
 		x, y, count := getNodeVals(n)
 		c := cell{
 			kind:  human,
-			count: count,
-			x:     x,
-			y:     y,
+			Count: count,
+			X:     x,
+			Y:     y,
 		}
 		i := m.set(c)
 		m.humans = append(m.humans, i)
@@ -116,9 +116,9 @@ func (m *Map) load(mapPath string) {
 		x, y, count := getNodeVals(n)
 		c := cell{
 			kind:  wolf,
-			count: count,
-			x:     x,
-			y:     y,
+			Count: count,
+			X:     x,
+			Y:     y,
 		}
 		i := m.set(c)
 		m.monster[0] = append(m.monster[0], i)
@@ -130,9 +130,9 @@ func (m *Map) load(mapPath string) {
 		x, y, count := getNodeVals(n)
 		c := cell{
 			kind:  vamp,
-			count: count,
-			x:     x,
-			y:     y,
+			Count: count,
+			X:     x,
+			Y:     y,
 		}
 		i := m.set(c)
 		m.monster[1] = append(m.monster[1], i)
@@ -144,7 +144,7 @@ func (m *Map) get(x, y int) cell {
 }
 
 func (m *Map) set(c cell) (index int) {
-	index = (c.y - 1) + (c.x-1)*m.Columns
+	index = (c.Y - 1) + (c.X-1)*m.Columns
 	m.cells[index] = c
 	return index
 }
@@ -167,23 +167,23 @@ func (m *Map) apply(moves []move, id int) error {
 		if old.kind != kind {
 			return ErrMoveWrongKind
 		}
-		if old.count < mov.count {
+		if old.Count < mov.count {
 			return ErrMoveTooMany
 		}
-		old.count -= mov.count
+		old.Count -= mov.count
 		i := m.set(old)
-		if old.count == 0 {
+		if old.Count == 0 {
 			m.monster[id] = remove(m.monster[id], i)
 		}
 		affected = append(affected, new)
 		affected = append(affected, old)
 		var isAffected bool
 		for _, c := range affected {
-			if c.x == new.x && c.y == new.y {
+			if c.X == new.X && c.Y == new.Y {
 				isAffected = true
 				empty := cell{
-					x: c.x,
-					y: c.y,
+					X: c.X,
+					Y: c.Y,
 				}
 				i := m.set(empty)
 				m.monster[id] = remove(m.monster[id], i)
@@ -195,69 +195,69 @@ func (m *Map) apply(moves []move, id int) error {
 		if new.IsEmpty() {
 			// Moves to empty cell
 			new.kind = kind
-			new.count = mov.count
+			new.Count = mov.count
 			i := m.set(new)
 			m.monster[id] = append(m.monster[id], i)
 			sort.Ints(m.monster[id])
 		} else if new.kind == old.kind {
 			// Fusion movement
-			new.count += mov.count
+			new.Count += mov.count
 			m.set(new)
 		} else if new.kind == 0 {
 			// Human fight
-			if new.count > mov.count {
+			if new.Count > mov.count {
 				// Instant loss
 			} else {
 				// FIGHT
 				var P float64
-				if mov.count == new.count {
+				if new.Count == mov.count {
 					P = 0.5
 				} else {
-					P = float64(mov.count)/float64(new.count) - 0.5
+					P = float64(mov.count)/float64(new.Count) - 0.5
 				}
 				if rand.Float64() > P {
 					// Victory
-					survivor := int(P * (float64(mov.count + new.count)))
+					survivor := int(P * (float64(mov.count + new.Count)))
 					new.kind = kind
-					new.count = survivor
+					new.Count = survivor
 					i := m.set(new)
 					m.monster[id] = append(m.monster[id], i)
 					sort.Ints(m.monster[id])
 					m.humans = remove(m.humans, i)
 				} else {
 					// Loss
-					survivor := int((1 - P) * (float64(new.count)))
-					new.count = survivor
+					survivor := int((1 - P) * (float64(new.Count)))
+					new.Count = survivor
 					m.set(new)
 				}
 			}
 		} else {
 			// Monster fight
-			if float64(new.count) > 1.5*float64(mov.count) {
+			if float64(new.Count) > 1.5*float64(mov.count) {
 				// Instant loss
 			} else {
 				// FIGHT
 				var P float64
-				if mov.count == new.count {
+				if mov.count == new.Count {
 					P = 0.5
-				} else if mov.count < new.count {
-					P = float64(mov.count) / float64(2*new.count)
+				} else if mov.count < new.Count {
+					P = float64(mov.count) / float64(2*new.Count)
 				} else {
-					P = float64(mov.count)/float64(new.count) - 0.5
+					P = float64(mov.count)/float64(new.Count) - 0.5
 				}
 				if rand.Float64() > P {
 					// Victory
 					survivor := int(P * (float64(mov.count)))
 					new.kind = kind
-					new.count = survivor
+					new.Count = survivor
 					i := m.set(new)
 					m.monster[id] = append(m.monster[id], i)
 					sort.Ints(m.monster[id])
 					m.monster[(id+1)&1] = remove(m.monster[(id+1)&1], i)
 				} else {
 					// Loss
-					survivor := int((1 - P) * (float64(new.count)))
-					new.count = survivor
+					survivor := int((1 - P) * (float64(new.Count)))
+					new.Count = survivor
 					m.set(new)
 				}
 			}
@@ -267,7 +267,7 @@ func (m *Map) apply(moves []move, id int) error {
 }
 
 func isNeighbour(c1, c2 cell) bool {
-	return abs(c1.x-c2.x) <= 1 && abs(c1.y-c2.y) <= 1 && !(c1.x == c2.x && c1.y == c2.y)
+	return abs(c1.X-c2.X) <= 1 && abs(c1.Y-c2.Y) <= 1 && !(c1.X == c2.X && c1.Y == c2.Y)
 }
 
 func abs(n int) int {
