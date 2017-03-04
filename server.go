@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"log"
 	"net"
@@ -51,7 +52,15 @@ func (s *server) run() {
 	go s.runP(con1, 1, ch1, done1)
 
 	ch0 <- true
-	time.Sleep(10 * time.Second)
+	<-done0
+	ch1 <- true
+	<-done1
+	for i := 0; i < 50; i++ {
+		ch0 <- true
+		<-done0
+		ch1 <- true
+		<-done1
+	}
 }
 
 func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
@@ -76,10 +85,16 @@ func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
 	log.Printf("Initialisation finished for player %d", id)
 	<-ch
 	s.state(c, "UPD")
-	fmt.Println("state")
 	c.SetDeadline(time.Now().Add(10 * time.Second))
-	s.upd(c)
+	s.upd(c, id)
 	done <- true
+	for _ = range ch {
+		s.state(c, "UPD")
+		log.Printf("Move time for player %d", id)
+		c.SetDeadline(time.Now().Add(2 * time.Second))
+		s.upd(c, id)
+		done <- true
+	}
 }
 
 func (s *server) set(c net.Conn) {
@@ -145,5 +160,29 @@ func (s *server) state(c net.Conn, trame string) {
 	c.Write(msg)
 }
 
-func (s *server) upd(c net.Conn) {
+func (s *server) upd(c net.Conn, id int) error {
+	buf := make([]byte, 100)
+	c.Read(buf[:3])
+	if bytes.Compare(buf[:3], []byte("MOV")) != 0 {
+		return errors.New("Invalid MOV trame value")
+	}
+
+	c.Read(buf[:1])
+	t := int(buf[0])
+	if t > 100 {
+		buf = make([]byte, t)
+	}
+	c.Read(buf[:t])
+	moves := make([]move, t)
+	for i := 0; i < t; i++ {
+		c.Read(buf[:5])
+		moves[i] = move{
+			oldx:  int(buf[0]),
+			oldy:  int(buf[1]),
+			count: int(buf[2]),
+			newx:  int(buf[3]),
+			newy:  int(buf[4]),
+		}
+	}
+	return s.apply(moves, id)
 }
