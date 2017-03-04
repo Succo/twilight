@@ -16,14 +16,30 @@
 					</pattern>
 				</defs>
 				<rect width="100%" height="100%" fill="url(#grid)" />
-				<rect v-for="h in humans"
-						v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
-						stroke="blue" fill="blue"
-						fill-opacity="0.5" stroke-opacity="0.8"/>
-				<text v-for="h in humans"
-						v-bind:x="h.X+20" v-bind:y="h.Y+40">
-					{{h.c}}
-				</text>
+				<g v-for="h in humans">
+					<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
+							stroke="blue" fill="blue"
+							fill-opacity="0.5" stroke-opacity="0.8"/>
+					<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
+						{{h.c}}
+					</text>
+				</g>
+				<g v-for="v in vamps">
+					<rect v-bind:x="v.X" v-bind:y="v.Y" width="80" height="80"
+							stroke="red" fill="red"
+							fill-opacity="0.5" stroke-opacity="0.8"/>
+					<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
+						{{v.c}}
+					</text>
+				</g>
+				<g v-for="w in wolfs">
+					<rect v-bind:x="w.X" v-bind:y="w.Y" width="80" height="80"
+							stroke="green" fill="green"
+							fill-opacity="0.5" stroke-opacity="0.8"/>
+					<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
+						{{w.c}}
+					</text>
+				</g>
 				</svg>
 		</div>
 	</div>
@@ -38,7 +54,13 @@
 			humans: [
 			{X: 80, Y: 160, c: 5},
 			{X: 240, Y: 160, c: 5}
-			]
+			],
+			vamps: [
+			{X: 0, Y: 240, c: 5},
+			],
+			wolfs: [
+			{X: 320, Y: 80, c: 5},
+			],
 		  }
 		})
 	</script>
