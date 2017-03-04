@@ -10,15 +10,20 @@
 		<div v-bind:style="dim">
 			<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
 				<defs>
-					<pattern id="smallGrid" width="8" height="8" patternUnits="userSpaceOnUse">
-						<path d="M 8 0 L 0 0 0 8" fill="none" stroke="gray" stroke-width="0.5"/>
-					</pattern>
 					<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
 						<rect width="80" height="80" fill="url(#smallGrid)"/>
 						<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
 					</pattern>
 				</defs>
 				<rect width="100%" height="100%" fill="url(#grid)" />
+				<rect v-for="h in humans"
+						v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
+						stroke="blue" fill="blue"
+						fill-opacity="0.5" stroke-opacity="0.8"/>
+				<text v-for="h in humans"
+						v-bind:x="h.X+20" v-bind:y="h.Y+40">
+					{{h.c}}
+				</text>
 				</svg>
 		</div>
 	</div>
@@ -30,6 +35,10 @@
 				width: 401 + 'px',
 				height: 481 + 'px',
 			},
+			humans: [
+			{X: 80, Y: 160, c: 5},
+			{X: 240, Y: 160, c: 5}
+			]
 		  }
 		})
 	</script>
