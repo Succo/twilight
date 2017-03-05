@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"time"
@@ -64,19 +66,19 @@ func (s *server) run() {
 }
 
 func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
+	reader := bufio.NewReader(c)
 	buf := make([]byte, 10)
-	c.Read(buf[:3])
+	io.ReadFull(reader, buf[:4])
 	if bytes.Compare(buf[:3], []byte("NME")) != 0 {
 		fmt.Errorf("Invalid first connexion value")
 		return
 	}
 
-	c.Read(buf[:1])
-	t := int(buf[0])
+	t := int(buf[3])
 	if t > 10 {
 		buf = make([]byte, t)
 	}
-	c.Read(buf[:t])
+	io.ReadFull(reader, buf[:t])
 	s.name[id] = string(buf[:t])
 	s.set(c)
 	s.hum(c)
@@ -85,14 +87,19 @@ func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
 	log.Printf("Initialisation finished for player %d", id)
 	<-ch
 	s.state(c, "UPD")
-	c.SetDeadline(time.Now().Add(10 * time.Second))
-	s.upd(c, id)
+	c.SetReadDeadline(time.Now().Add(10 * time.Second))
+	err := s.upd(reader, id)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 	done <- true
 	for _ = range ch {
 		s.state(c, "UPD")
-		log.Printf("Move time for player %d", id)
-		c.SetDeadline(time.Now().Add(2 * time.Second))
-		s.upd(c, id)
+		c.SetReadDeadline(time.Now().Add(2 * time.Second))
+		err := s.upd(reader, id)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
 		done <- true
 	}
 }
@@ -160,26 +167,41 @@ func (s *server) state(c net.Conn, trame string) {
 	c.Write(msg)
 }
 
-func (s *server) upd(c net.Conn, id int) error {
-	buf := make([]byte, 100)
-	c.Read(buf[:3])
+func (s *server) upd(reader *bufio.Reader, id int) error {
+	buf := make([]byte, 5)
+	_, err := io.ReadFull(reader, buf[:3])
+	if err != nil {
+		return err
+	}
 	if bytes.Compare(buf[:3], []byte("MOV")) != 0 {
+		fmt.Println(string(buf[:3]), buf)
 		return errors.New("Invalid MOV trame value")
 	}
 
-	c.Read(buf[:1])
+	_, err = io.ReadFull(reader, buf[:1])
+	if err != nil {
+		return err
+	}
 	t := int(buf[0])
+	fmt.Println(t)
 	moves := make([]move, t)
 	for i := 0; i < t; i++ {
-		c.Read(buf[:5])
-		moves[i] = move{
-			oldx:  int(buf[0]),
-			oldy:  int(buf[1]),
-			count: int(buf[2]),
-			newx:  int(buf[3]),
-			newy:  int(buf[4]),
+		_, e := io.ReadFull(reader, buf[:5])
+		if e != nil {
+			err = e
+			continue
 		}
+		moves[i] = move{
+			oldx:  int(uint(buf[0])),
+			oldy:  int(uint(buf[1])),
+			count: int(uint(buf[2])),
+			newx:  int(uint(buf[3])),
+			newy:  int(uint(buf[4])),
+		}
+		fmt.Println(moves[i])
 	}
-	fmt.Println(t, moves)
+	if err != nil {
+		return err
+	}
 	return s.apply(moves, id)
 }

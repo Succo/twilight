@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -13,10 +12,11 @@ func startWebApp(m *Map) {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	index, err := template.ParseFiles("index.html")
-	fmt.Println(err)
+	if err != nil {
+		panic(err.Error())
+	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		index.Execute(w, packMap(m))
-		//http.ServeFile(w, r, "index.html")
 	})
 
 	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {

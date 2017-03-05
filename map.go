@@ -140,7 +140,10 @@ func (m *Map) load(mapPath string) {
 }
 
 func (m *Map) get(x, y int) cell {
-	return m.cells[(y-1)+(x-1)*m.Columns]
+	c := m.cells[(y-1)+(x-1)*m.Columns]
+	c.X = x
+	c.Y = y
+	return c
 }
 
 func (m *Map) set(c cell) (index int) {
@@ -153,10 +156,10 @@ func (m *Map) apply(moves []move, id int) error {
 	kind := specie(1 + id)
 	var affected []cell
 	for _, mov := range moves {
-		if mov.oldx == 0 || mov.oldx > m.Columns || mov.oldy == 0 || mov.oldy > m.Rows {
+		if mov.oldx == 0 || mov.oldx > m.Rows || mov.oldy == 0 || mov.oldy > m.Columns {
 			return ErrOutOfGrid
 		}
-		if mov.newx == 0 || mov.newx > m.Columns || mov.newy == 0 || mov.newy > m.Rows {
+		if mov.newx == 0 || mov.newx > m.Rows || mov.newy == 0 || mov.newy > m.Columns {
 			return ErrOutOfGrid
 		}
 		old := m.get(mov.oldx, mov.oldy)
@@ -175,8 +178,6 @@ func (m *Map) apply(moves []move, id int) error {
 		if old.Count == 0 {
 			m.monster[id] = remove(m.monster[id], i)
 		}
-		affected = append(affected, new)
-		affected = append(affected, old)
 		var isAffected bool
 		for _, c := range affected {
 			if c.X == new.X && c.Y == new.Y {
@@ -189,6 +190,8 @@ func (m *Map) apply(moves []move, id int) error {
 				m.monster[id] = remove(m.monster[id], i)
 			}
 		}
+		affected = append(affected, new)
+		affected = append(affected, old)
 		if isAffected {
 			continue
 		}
@@ -210,12 +213,14 @@ func (m *Map) apply(moves []move, id int) error {
 			} else {
 				// FIGHT
 				var P float64
-				if new.Count == mov.count {
+				if new.Count < mov.count {
+					P = 1
+				} else if new.Count == mov.count {
 					P = 0.5
 				} else {
-					P = float64(mov.count)/float64(new.Count) - 0.5
+					P = float64(mov.count) / (float64(new.Count) - 0.5)
 				}
-				if rand.Float64() > P {
+				if rand.Float64() < P {
 					// Victory
 					survivor := int(P * (float64(mov.count + new.Count)))
 					new.kind = kind
