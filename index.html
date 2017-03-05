@@ -9,19 +9,13 @@
 		<p>Welcome to twilight</p>
 		<div v-bind:style="dim">
 			<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-				<defs>
-					<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-						<rect width="80" height="80" fill="url(#smallGrid)"/>
-						<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
-					</pattern>
-				</defs>
 				<rect width="100%" height="100%" fill="url(#grid)" />
 				<g v-for="h in humans">
 					<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
 							stroke="blue" fill="blue"
 							fill-opacity="0.5" stroke-opacity="0.8"/>
 					<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
-						{{h.c}}
+						{{"{{h.c}}"}}
 					</text>
 				</g>
 				<g v-for="v in vamps">
@@ -29,7 +23,7 @@
 							stroke="red" fill="red"
 							fill-opacity="0.5" stroke-opacity="0.8"/>
 					<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
-						{{v.c}}
+						{{"{{v.c}}"}}
 					</text>
 				</g>
 				<g v-for="w in wolfs">
@@ -37,9 +31,15 @@
 							stroke="green" fill="green"
 							fill-opacity="0.5" stroke-opacity="0.8"/>
 					<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
-						{{w.c}}
+						{{"{{w.c}}"}}
 					</text>
 				</g>
+				<defs>
+					<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+						<rect width="80" height="80" fill="url(#smallGrid)"/>
+						<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
+					</pattern>
+				</defs>
 				</svg>
 		</div>
 	</div>
@@ -48,19 +48,12 @@
 		  el: '#grid',
 		  data: {
 			dim: {
-				width: 401 + 'px',
-				height: 481 + 'px',
+				width: {{.X}} + 'px',
+				height: {{.Y}} + 'px',
 			},
-			humans: [
-			{X: 80, Y: 160, c: 5},
-			{X: 240, Y: 160, c: 5}
-			],
-			vamps: [
-			{X: 0, Y: 240, c: 5},
-			],
-			wolfs: [
-			{X: 320, Y: 80, c: 5},
-			],
+			humans: {{.Humans}},
+			vamps: {{.Vamps}},
+			wolfs: {{.Wolfs}},
 		  }
 		});
 		(function poll(){
@@ -69,8 +62,6 @@
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						data = JSON.parse(this.responseText);
-						grid.dim.width = data.X + "px"
-						grid.dim.height = data.Y + "px"
 						grid.humans = data.Humans;
 						grid.vamps = data.Vamps;
 						grid.wolf  = data.Wolfs;
@@ -79,7 +70,7 @@
 				};
 				xhttp.open("GET", "/data", true);
 				xhttp.send();
-			}, 3000);
+			}, 300);
 		})();
 	</script>
 	</body>

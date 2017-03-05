@@ -2,6 +2,8 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 )
@@ -10,8 +12,11 @@ func startWebApp(m *Map) {
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
+	index, err := template.ParseFiles("index.html")
+	fmt.Println(err)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, "index.html")
+		index.Execute(w, packMap(m))
+		//http.ServeFile(w, r, "index.html")
 	})
 
 	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
@@ -31,7 +36,7 @@ type packed struct {
 }
 
 func packMap(m *Map) packed {
-	p := packed{X: m.Rows*80 + 1, Y: m.Columns*80 + 1}
+	p := packed{Y: m.Rows*80 + 1, X: m.Columns*80 + 1}
 	for _, i := range m.humans {
 		p.Humans = append(p.Humans, scale(m.cells[i]))
 	}

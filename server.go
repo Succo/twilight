@@ -169,10 +169,6 @@ func (s *server) upd(c net.Conn, id int) error {
 
 	c.Read(buf[:1])
 	t := int(buf[0])
-	if t > 100 {
-		buf = make([]byte, t)
-	}
-	c.Read(buf[:t])
 	moves := make([]move, t)
 	for i := 0; i < t; i++ {
 		c.Read(buf[:5])
@@ -184,5 +180,6 @@ func (s *server) upd(c net.Conn, id int) error {
 			newy:  int(buf[4]),
 		}
 	}
+	fmt.Println(t, moves)
 	return s.apply(moves, id)
 }
