@@ -50,7 +50,7 @@ func packMap(m *Map) packed {
 }
 
 func scale(c cell) cell {
-	c.X *= 80
-	c.Y *= 80
+	c.X = (c.X - 1) * 80
+	c.Y = (c.Y - 1) * 80
 	return c
 }

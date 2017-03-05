@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"sort"
@@ -93,6 +94,14 @@ func (m *Map) load(mapPath string) {
 		panic("No col found")
 	}
 	m.cells = make([]cell, m.Columns*m.Rows)
+	var i int
+	for x := 0; x < m.Rows; x++ {
+		for y := 0; y < m.Columns; y++ {
+			m.cells[i].X = x + 1
+			m.cells[i].Y = y + 1
+			i++
+		}
+	}
 
 	path = xmlpath.MustCompile("/Map/Humans")
 	iter := path.Iter(root)
@@ -141,8 +150,6 @@ func (m *Map) load(mapPath string) {
 
 func (m *Map) get(x, y int) cell {
 	c := m.cells[(y-1)+(x-1)*m.Columns]
-	c.X = x
-	c.Y = y
 	return c
 }
 
@@ -269,6 +276,15 @@ func (m *Map) apply(moves []move, id int) error {
 		}
 	}
 	return nil
+}
+
+func (m *Map) pprint() {
+	for x := 0; x < m.Rows; x++ {
+		fmt.Println(m.cells[x*m.Columns : (x+1)*m.Columns])
+	}
+	fmt.Println("H:", m.humans)
+	fmt.Println("W:", m.monster[0])
+	fmt.Println("V:", m.monster[1])
 }
 
 func isNeighbour(c1, c2 cell) bool {
