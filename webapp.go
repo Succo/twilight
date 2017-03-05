@@ -36,7 +36,7 @@ type packed struct {
 }
 
 func packMap(m *Map) packed {
-	p := packed{Y: m.Rows*80 + 1, X: m.Columns*80 + 1}
+	p := packed{X: m.Columns*80 + 1, Y: m.Rows*80 + 1}
 	for _, i := range m.humans {
 		p.Humans = append(p.Humans, scale(m.cells[i]))
 	}
@@ -50,7 +50,7 @@ func packMap(m *Map) packed {
 }
 
 func scale(c cell) cell {
-	c.X = (c.X - 1) * 80
-	c.Y = (c.Y - 1) * 80
+	c.X = c.X * 80
+	c.Y = c.Y * 80
 	return c
 }

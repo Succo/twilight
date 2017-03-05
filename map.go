@@ -30,9 +30,8 @@ var (
 type cell struct {
 	kind  specie
 	Count int `json:"c"`
-	// Be careful with 0 indexing they don't correspond to actual position
-	X int `json:"X"`
-	Y int `json:"Y"`
+	X     int `json:"X"`
+	Y     int `json:"Y"`
 }
 
 func (c cell) IsEmpty() bool {
@@ -95,10 +94,10 @@ func (m *Map) load(mapPath string) {
 	}
 	m.cells = make([]cell, m.Columns*m.Rows)
 	var i int
-	for x := 0; x < m.Rows; x++ {
-		for y := 0; y < m.Columns; y++ {
-			m.cells[i].X = x + 1
-			m.cells[i].Y = y + 1
+	for x := 0; x < m.Columns; x++ {
+		for y := 0; y < m.Rows; y++ {
+			m.cells[i].X = x
+			m.cells[i].Y = y
 			i++
 		}
 	}
@@ -149,36 +148,37 @@ func (m *Map) load(mapPath string) {
 }
 
 func (m *Map) get(x, y int) cell {
-	c := m.cells[(y-1)+(x-1)*m.Columns]
+	c := m.cells[y+x*m.Rows]
 	return c
 }
 
 func (m *Map) set(c cell) (index int) {
-	index = (c.Y - 1) + (c.X-1)*m.Columns
+	index = c.Y + c.X*m.Rows
 	m.cells[index] = c
 	return index
 }
 
-func (m *Map) apply(moves []move, id int) error {
+func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 	kind := specie(1 + id)
-	var affected []cell
 	for _, mov := range moves {
-		if mov.oldx == 0 || mov.oldx > m.Rows || mov.oldy == 0 || mov.oldy > m.Columns {
-			return ErrOutOfGrid
+		if mov.oldx < 0 || mov.oldx > m.Columns || mov.oldy < 0 || mov.oldy > m.Rows {
+			fmt.Println("old", mov.oldx, mov.oldy)
+			return ErrOutOfGrid, affected
 		}
-		if mov.newx == 0 || mov.newx > m.Rows || mov.newy == 0 || mov.newy > m.Columns {
-			return ErrOutOfGrid
+		if mov.newx < 0 || mov.newx > m.Columns || mov.newy < 0 || mov.newy > m.Rows {
+			fmt.Println("new", mov.newx, mov.newy)
+			return ErrOutOfGrid, affected
 		}
 		old := m.get(mov.oldx, mov.oldy)
 		new := m.get(mov.newx, mov.newy)
 		if !isNeighbour(old, new) {
-			return ErrMoveToImpCase
+			return ErrMoveToImpCase, affected
 		}
 		if old.kind != kind {
-			return ErrMoveWrongKind
+			return ErrMoveWrongKind, affected
 		}
 		if old.Count < mov.count {
-			return ErrMoveTooMany
+			return ErrMoveTooMany, affected
 		}
 		old.Count -= mov.count
 		i := m.set(old)
@@ -275,16 +275,32 @@ func (m *Map) apply(moves []move, id int) error {
 			}
 		}
 	}
-	return nil
+	return nil, affected
 }
 
 func (m *Map) pprint() {
-	for x := 0; x < m.Rows; x++ {
-		fmt.Println(m.cells[x*m.Columns : (x+1)*m.Columns])
+	for x := 0; x < m.Columns; x++ {
+		fmt.Println(m.cells[x*m.Rows : (x+1)*m.Rows])
 	}
 	fmt.Println("H:", m.humans)
 	fmt.Println("W:", m.monster[0])
 	fmt.Println("V:", m.monster[1])
+}
+
+func (m *Map) reload(update []cell) (reloaded []cell) {
+	for _, cl := range update {
+		var alreadyPresent bool
+		for _, rl := range reloaded {
+			if cl.X == rl.X && cl.Y == rl.Y {
+				alreadyPresent = true
+				break
+			}
+		}
+		if !alreadyPresent {
+			reloaded = append(reloaded, m.get(cl.X, cl.Y))
+		}
+	}
+	return reloaded
 }
 
 func isNeighbour(c1, c2 cell) bool {

@@ -9,6 +9,7 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
 	var names [2]string
 	s := server{newMap(mapPath), names}
 	go startWebApp(s.Map)

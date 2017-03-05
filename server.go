@@ -39,8 +39,8 @@ func (s *server) run() {
 		panic(err.Error())
 	}
 	log.Println("First player entered the game")
-	ch0 := make(chan bool, 1)
-	done0 := make(chan bool, 1)
+	ch0 := make(chan []cell, 1)
+	done0 := make(chan []cell, 1)
 	go s.runP(con0, 0, ch0, done0)
 
 	// second player
@@ -49,23 +49,25 @@ func (s *server) run() {
 		panic(err.Error())
 	}
 	log.Println("Second player entered the game")
-	ch1 := make(chan bool, 1)
-	done1 := make(chan bool, 1)
+	ch1 := make(chan []cell, 1)
+	done1 := make(chan []cell, 1)
 	go s.runP(con1, 1, ch1, done1)
 
-	ch0 <- true
-	<-done0
-	ch1 <- true
-	<-done1
+	var update0, update1 []cell
+	ch0 <- make([]cell, 0)
+	update0 = <-done0
+	ch1 <- update0
+	update1 = <-done1
 	for i := 0; i < 50; i++ {
-		ch0 <- true
-		<-done0
-		ch1 <- true
-		<-done1
+		ch0 <- append(update0, update1...)
+		update0 = <-done0
+		ch1 <- append(update1, update0...)
+		update1 = <-done1
 	}
 }
 
-func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
+func (s *server) runP(c net.Conn, id int, ch chan []cell, done chan []cell) {
+	// Initialisation stuff
 	reader := bufio.NewReader(c)
 	buf := make([]byte, 10)
 	io.ReadFull(reader, buf[:4])
@@ -83,24 +85,26 @@ func (s *server) runP(c net.Conn, id int, ch chan bool, done chan bool) {
 	s.set(c)
 	s.hum(c)
 	s.hme(c, id)
-	s.state(c, "MAP")
+	s.send_map(c)
 	log.Printf("Initialisation finished for player %d", id)
+	s.send_upd(c, make([]cell, 0))
+
+	// First round
 	<-ch
-	s.state(c, "UPD")
 	c.SetReadDeadline(time.Now().Add(10 * time.Second))
-	err := s.upd(reader, id)
+	err, updated := s.upd(reader, id)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	done <- true
-	for _ = range ch {
-		s.state(c, "UPD")
+	done <- updated
+	for update := range ch {
+		s.send_upd(c, update)
 		c.SetReadDeadline(time.Now().Add(2 * time.Second))
-		err := s.upd(reader, id)
+		err, updated := s.upd(reader, id)
 		if err != nil {
 			fmt.Println(err.Error())
 		}
-		done <- true
+		done <- updated
 	}
 }
 
@@ -134,10 +138,10 @@ func (s *server) hme(c net.Conn, id int) {
 	c.Write(msg)
 }
 
-func (s *server) state(c net.Conn, trame string) {
+func (s *server) send_map(c net.Conn) {
 	n := len(s.humans) + len(s.monster[0]) + len(s.monster[1])
 	msg := make([]byte, 4+5*n)
-	copy(msg, []byte(trame))
+	copy(msg, []byte("MAP"))
 	msg[3] = byte(uint8(n))
 	var i int
 	// Send all humans data
@@ -167,20 +171,45 @@ func (s *server) state(c net.Conn, trame string) {
 	c.Write(msg)
 }
 
-func (s *server) upd(reader *bufio.Reader, id int) error {
+func (s *server) send_upd(c net.Conn, update []cell) {
+	update = s.reload(update)
+	n := len(update)
+	msg := make([]byte, 4+5*n)
+	copy(msg, []byte("UPD"))
+	msg[3] = byte(uint8(n))
+	for i, cl := range update {
+		switch cl.kind {
+		case human:
+			msg[4+5*i] = byte(uint8(cl.X))
+			msg[4+5*i+1] = byte(uint8(cl.Y))
+			msg[4+5*i+2] = byte(uint8(cl.Count))
+		case wolf:
+			msg[4+5*i] = byte(uint8(cl.X))
+			msg[4+5*i+1] = byte(uint8(cl.Y))
+			msg[4+5*i+4] = byte(uint8(cl.Count))
+		case vamp:
+			msg[4+5*i] = byte(uint8(cl.X))
+			msg[4+5*i+1] = byte(uint8(cl.Y))
+			msg[4+5*i+3] = byte(uint8(cl.Count))
+		}
+	}
+	c.Write(msg)
+}
+
+func (s *server) upd(reader *bufio.Reader, id int) (err error, update []cell) {
 	buf := make([]byte, 5)
-	_, err := io.ReadFull(reader, buf[:3])
+	_, err = io.ReadFull(reader, buf[:3])
 	if err != nil {
-		return err
+		return err, update
 	}
 	if bytes.Compare(buf[:3], []byte("MOV")) != 0 {
 		fmt.Println(string(buf[:3]), buf)
-		return errors.New("Invalid MOV trame value")
+		return errors.New("Invalid MOV trame value"), update
 	}
 
 	_, err = io.ReadFull(reader, buf[:1])
 	if err != nil {
-		return err
+		return err, update
 	}
 	t := int(buf[0])
 	fmt.Println(t)
@@ -201,7 +230,7 @@ func (s *server) upd(reader *bufio.Reader, id int) error {
 		fmt.Println(moves[i])
 	}
 	if err != nil {
-		return err
+		return err, update
 	}
 	return s.apply(moves, id)
 }
