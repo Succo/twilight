@@ -21,6 +21,7 @@
 				<h2>{{"{{totalW}}"}}</h2>
 			</div>
 		</div>
+
 		<div id="grid" class="col-md-6">
 			<div v-bind:style="dim">
 				<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -54,10 +55,12 @@
 					</svg>
 			</div>
 		</div>
+
 		<div  class="col-md-3">
 			<h3>Welcome to twilight</h3>
 			<h4>{{"{{state}}"}}</h4>
 			<h4>Mouvement {{"{{mov}}"}}</h4>
+			<button v-on:click="playpause">Play</button>
 		</div>
 	</div>
 
@@ -74,6 +77,8 @@
 			wolfs: {{.Wolfs}},
 			state: {{.State}},
 			mov: {{.Mov}},
+			history: [],
+			playing: true,
 		  },
 		  computed: {
 			  totalH: function() {
@@ -91,7 +96,12 @@
 					  return acc + val.c
 				  }, 0);
 			  },
+		  },
+		  methods: {
+			playpause: function() {
+				this.playing =  !this.playing;
 			}
+		  }
 		});
 		(function poll(){
 			setTimeout(function(){
@@ -100,11 +110,14 @@
 					if (this.readyState == 4 && this.status == 200) {
 						data = JSON.parse(this.responseText);
 						if (data.Mov > game.mov) {
-							game.humans = data.Humans;
-							game.vamps = data.Vamps;
-							game.wolfs  = data.Wolfs;
-							game.state = data.State;
-							game.mov = data.Mov
+							if (game.playing) {
+								game.humans = data.Humans;
+								game.vamps = data.Vamps;
+								game.wolfs  = data.Wolfs;
+								game.state = data.State;
+								game.mov = data.Mov
+							}
+							game.history.push(data)
 						}
 						poll()
 					}
