@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"math/rand"
 	"os"
 	"sort"
 	"strconv"
@@ -227,67 +226,31 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 
 		case new.kind == 0:
 			// Human fight
-			if new.Count > mov.count {
-				// Instant loss
+			survivor, hasWon := simulateHumanFight(mov.count, new.Count)
+			if hasWon {
+				new.kind = kind
+				new.Count = survivor
+				fmt.Println(survivor)
+				i := m.set(new)
+				m.monster[id] = append(m.monster[id], i)
+				sort.Ints(m.monster[id])
+				m.humans = remove(m.humans, i)
 			} else {
-				// FIGHT
-				var P float64
-				if new.Count < mov.count {
-					P = 1
-				} else if new.Count == mov.count {
-					P = 0.5
-				} else {
-					P = float64(mov.count) / (float64(new.Count) - 0.5)
-				}
-				if rand.Float64() < P {
-					// Victory
-					survivor := int(P * (float64(mov.count + new.Count)))
-					new.kind = kind
-					new.Count = survivor
-					i := m.set(new)
-					m.monster[id] = append(m.monster[id], i)
-					sort.Ints(m.monster[id])
-					m.humans = remove(m.humans, i)
-				} else {
-					// Loss
-					survivor := int((1 - P) * (float64(new.Count)))
-					new.Count = survivor
-					m.set(new)
-				}
+				new.Count = survivor
+				m.set(new)
 			}
 		default:
-
-			// Monster fight
-			if float64(new.Count) > 1.5*float64(mov.count) {
-				// Instant loss
+			survivor, hasWon := simulateMonsterFight(mov.count, new.Count)
+			if hasWon {
+				new.kind = kind
+				new.Count = survivor
+				i := m.set(new)
+				m.monster[id] = append(m.monster[id], i)
+				sort.Ints(m.monster[id])
+				m.monster[(id+1)&1] = remove(m.monster[(id+1)&1], i)
 			} else {
-				// FIGHT
-				var P float64
-				if mov.count == new.Count {
-					P = 0.5
-				} else if mov.count < new.Count {
-					P = float64(mov.count) / float64(2*new.Count)
-				} else {
-					P = float64(mov.count)/float64(new.Count) - 0.5
-				}
-				if P > 1.0 {
-					P = 1.0
-				}
-				if rand.Float64() < P {
-					// Victory
-					survivor := int(P * (float64(mov.count)))
-					new.kind = kind
-					new.Count = survivor
-					i := m.set(new)
-					m.monster[id] = append(m.monster[id], i)
-					sort.Ints(m.monster[id])
-					m.monster[(id+1)&1] = remove(m.monster[(id+1)&1], i)
-				} else {
-					// Loss
-					survivor := int((1 - P) * (float64(new.Count)))
-					new.Count = survivor
-					m.set(new)
-				}
+				new.Count = survivor
+				m.set(new)
 			}
 		}
 	}
