@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"sort"
 	"strconv"
@@ -172,8 +173,10 @@ func (m *Map) set(c cell) (index int) {
 }
 
 func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
+	log.Printf("===== Movement %d, %d units", m.mov, len(moves))
 	kind := specie(1 + id)
 	for _, mov := range moves {
+		//  Error checking for all moves
 		if mov.oldx < 0 || mov.oldx > m.Columns || mov.oldy < 0 || mov.oldy > m.Rows {
 			return ErrOutOfGrid, affected
 		}
@@ -191,11 +194,14 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 		if old.Count < mov.count {
 			return ErrMoveTooMany, affected
 		}
+		// Remove the units from the previous cell
 		old.Count -= mov.count
 		i := m.set(old)
 		if old.Count == 0 {
 			m.monster[id] = remove(m.monster[id], i)
 		}
+
+		// check for cell already used in this move
 		var isAffected bool
 		for _, c := range affected {
 			if c.X == new.X && c.Y == new.Y {
@@ -206,6 +212,7 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 				}
 				i := m.set(empty)
 				m.monster[id] = remove(m.monster[id], i)
+				break
 			}
 		}
 		affected = append(affected, new)
@@ -213,6 +220,7 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 		switch {
 		case isAffected:
 			// Nothing happens the unit are effectively deleted
+			log.Println("Destroying units going into affected cell")
 
 		case new.IsEmpty():
 			// Moves to empty cell
@@ -221,11 +229,13 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 			i := m.set(new)
 			m.monster[id] = append(m.monster[id], i)
 			sort.Ints(m.monster[id])
+			log.Println("Moving units into an empty cell")
 
 		case new.kind == old.kind:
 			// Fusion movement
 			new.Count += mov.count
 			m.set(new)
+			log.Println("Merging two groups into a cell")
 
 		case new.kind == 0:
 			// Human fight
@@ -237,9 +247,11 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 				m.monster[id] = append(m.monster[id], i)
 				sort.Ints(m.monster[id])
 				m.humans = remove(m.humans, i)
+				log.Println("Human deleted, units and survivor in place")
 			} else {
 				new.Count = survivor
 				m.set(new)
+				log.Println("Human survived, units deleted")
 			}
 		default:
 			survivor, hasWon := simulateMonsterFight(mov.count, new.Count)
@@ -250,9 +262,11 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 				m.monster[id] = append(m.monster[id], i)
 				sort.Ints(m.monster[id])
 				m.monster[(id+1)&1] = remove(m.monster[(id+1)&1], i)
+				log.Println("Attacker won, ennemy deleted")
 			} else {
 				new.Count = survivor
 				m.set(new)
+				log.Println("Attacker lost, ennemy lost some unit")
 			}
 		}
 	}
