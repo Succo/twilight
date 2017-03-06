@@ -18,6 +18,7 @@ Usage of twilight:
     	total number of rows (default 10)
 ```
 
+Comme avec le serveur officiel les bot se connectent sur le port 5555.
 La visualisation de la partie peut se faire sur navigateur à http://localhost:8080/.
 Pour des raisons de gain de temps, vue.js a été utilisé pour le rendu réactif du front.
 
