@@ -58,13 +58,18 @@
 
 		<div  class="col-md-3">
 			<h3>Welcome to twilight</h3>
-			<h4>{{"{{state}}"}}</h4>
-			<h4>Mouvement {{"{{mov}}"}}</h4>
-			<button class="btn btn-default" v-on:click="playpause">Play</button>
-			</br>
-			<table class="table table-striped">
+			<div style="display: flex;justify-content:space-around">
+				<div >
+					<h4>{{"{{state}}"}}</h4>
+					<h4>Mouvement {{"{{mov}}"}}</h4>
+				</div>
+				<button class="btn btn-default" v-on:click="playpause">
+					⏯️
+				</button>
+			</div>
+			<table class="table table-striped" style="width:90%;">
 				<tbody>
-					<tr v-for="i in history.length"> 
+					<tr v-for="i in history.length" style="height:1.2em"> 
 						<td  v-on:click="setState(i)">
 							Movement {{"{{i}}"}}
 						</td>
