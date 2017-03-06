@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/xml"
 	"fmt"
 	"io"
 	"math/rand"
+	"os"
 	"sort"
 	"time"
 )
@@ -74,6 +76,19 @@ func generate(filename string, Rows, Columns, humans, monster int) *Map {
 	sym.kind = vamp
 	j := m.set(sym)
 	m.monster[1] = []int{j}
+
+	if mapPath != "" {
+		// Save the map to file
+		w, err := os.Create(mapPath)
+		if err != nil {
+			panic(err.Error())
+		}
+		defer w.Close()
+		buf := bufio.NewWriter(w)
+		m.toXML(buf)
+		buf.Flush()
+	}
+
 	return m
 }
 

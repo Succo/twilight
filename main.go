@@ -1,6 +1,9 @@
 package main
 
-import "flag"
+import (
+	"flag"
+	"log"
+)
 
 var mapPath string
 var useRand bool
@@ -10,7 +13,7 @@ var humans int
 var monster int
 
 func init() {
-	flag.StringVar(&mapPath, "map", "maps/testmap.xml", "path to the map to load")
+	flag.StringVar(&mapPath, "map", "", "path to the map to load")
 	flag.BoolVar(&useRand, "rand", false, "use a randomly generated map")
 	flag.IntVar(&rows, "rows", 10, "total number of rows")
 	flag.IntVar(&columns, "columns", 10, "total number of columns")
@@ -23,7 +26,12 @@ func main() {
 	var names [2]string
 	var m *Map
 	if !useRand {
-		m = newMap(mapPath)
+		if mapPath != "" {
+			m = newMap(mapPath)
+		} else {
+			log.Println("Please either use -map with a valid filename or -rand for a random map")
+			return
+		}
 	} else {
 		m = generate(mapPath, rows, columns, humans, monster)
 	}
