@@ -2,51 +2,65 @@
 <html lang="en">
 	<head>
 	<meta charset="utf-8">
-	<script src="/static/vue.min.js"></script>
+	<script src="/static/js/vue.min.js"></script>
+	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
 	</head>
 	<body>
-	<div id="grid">
-		<p>Welcome to twilight</p>
-		<p>{{"{{state}}"}}</p>
-		<div v-bind:style="dim">
-			<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-				<rect width="100%" height="100%" fill="url(#grid)" />
-				<g v-for="h in humans">
-					<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
-							stroke="blue" fill="blue"
-							fill-opacity="0.5" stroke-opacity="0.8"/>
-					<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
-						{{"{{h.c}}"}}
-					</text>
-				</g>
-				<g v-for="v in vamps">
-					<rect v-bind:x="v.X" v-bind:y="v.Y" width="80" height="80"
-							stroke="red" fill="red"
-							fill-opacity="0.5" stroke-opacity="0.8"/>
-					<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
-						{{"{{v.c}}"}}
-					</text>
-				</g>
-				<g v-for="w in wolfs">
-					<rect v-bind:x="w.X" v-bind:y="w.Y" width="80" height="80"
-							stroke="green" fill="green"
-							fill-opacity="0.5" stroke-opacity="0.8"/>
-					<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
-						{{"{{w.c}}"}}
-					</text>
-				</g>
-				<defs>
-					<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-						<rect width="80" height="80" fill="url(#smallGrid)"/>
-						<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
-					</pattern>
-				</defs>
-				</svg>
+	<div class="row" id="game">
+		<div id="info" class="col-md-3" style="height:80vh">
+			<p style="height:33%;background-color:hsla(240,100%,50%, 0.5);">
+				{{"{{totalH}}"}}
+			</p>
+			<p style="height:33%;background-color:hsla(0,100%,50%, 0.5);">
+				{{"{{totalV}}"}}
+			</p>
+			<p style="height:33%;background-color:hsla(120,100%,50%, 0.5);">
+				{{"{{totalW}}"}}
+			</p>
+		</div>
+		<div id="grid" class="col-md-6">
+			<h3>Welcome to twilight</h3>
+			<h4>{{"{{state}}"}}</h4>
+			<div v-bind:style="dim">
+				<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+					<rect width="100%" height="100%" fill="url(#grid)" />
+					<g v-for="h in humans">
+						<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
+								stroke="blue" fill="blue"
+								fill-opacity="0.5" stroke-opacity="0.8"/>
+						<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
+							{{"{{h.c}}"}}
+						</text>
+					</g>
+					<g v-for="v in vamps">
+						<rect v-bind:x="v.X" v-bind:y="v.Y" width="80" height="80"
+								stroke="red" fill="red"
+								fill-opacity="0.5" stroke-opacity="0.8"/>
+						<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
+							{{"{{v.c}}"}}
+						</text>
+					</g>
+					<g v-for="w in wolfs">
+						<rect v-bind:x="w.X" v-bind:y="w.Y" width="80" height="80"
+								stroke="green" fill="green"
+								fill-opacity="0.5" stroke-opacity="0.8"/>
+						<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
+							{{"{{w.c}}"}}
+						</text>
+					</g>
+					<defs>
+						<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+							<rect width="80" height="80" fill="url(#smallGrid)"/>
+							<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
+						</pattern>
+					</defs>
+					</svg>
+			</div>
 		</div>
 	</div>
 	<script>
-		var grid = new Vue({
-		  el: '#grid',
+		var game = new Vue({
+		  el: '#game',
 		  data: {
 			dim: {
 				width: {{.X}} + 'px',
@@ -56,7 +70,24 @@
 			vamps: {{.Vamps}},
 			wolfs: {{.Wolfs}},
 			state: {{.State}},
-		  }
+		  },
+		  computed: {
+			  totalH: function() {
+				  return this.humans.reduce(function(acc, val) {
+					  return acc + val.c
+				  }, 0);
+			  },
+			  totalV: function() {
+				  return this.vamps.reduce(function(acc, val) {
+					  return acc + val.c
+				  }, 0);
+			  },
+			  totalW: function() {
+				  return this.wolfs.reduce(function(acc, val) {
+					  return acc + val.c
+				  }, 0);
+			  },
+			}
 		});
 		(function poll(){
 			setTimeout(function(){
@@ -64,10 +95,10 @@
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						data = JSON.parse(this.responseText);
-						grid.humans = data.Humans;
-						grid.vamps = data.Vamps;
-						grid.wolfs  = data.Wolfs;
-						grid.state = data.State;
+						game.humans = data.Humans;
+						game.vamps = data.Vamps;
+						game.wolfs  = data.Wolfs;
+						game.state = data.State;
 						poll()
 					}
 				};

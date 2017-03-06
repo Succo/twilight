@@ -40,7 +40,13 @@ type packed struct {
 }
 
 func packMap(m *Map) packed {
-	p := packed{X: m.Columns*80 + 1, Y: m.Rows*80 + 1}
+	p := packed{
+		X:      m.Columns*80 + 1,
+		Y:      m.Rows*80 + 1,
+		Humans: make([]cell, 0),
+		Vamps:  make([]cell, 0),
+		Wolfs:  make([]cell, 0),
+	}
 	for _, i := range m.humans {
 		p.Humans = append(p.Humans, scale(m.cells[i]))
 	}
