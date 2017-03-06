@@ -8,15 +8,15 @@
 	<body>
 	<div class="row" id="game">
 		<div id="info" class="col-md-3" style="height:80vh">
-			<div style="background-color:hsla(240,100%,50%, 0.5);">
+			<div style="background-color:rgb(42,79,110);">
 				<img src="/static/img/human.svg">
 				<h2>{{"{{totalH}}"}}</h2>
 			</div>
-			<div style="background-color:hsla(0,100%,50%, 0.5);">
+			<div style="background-color:rgb(170,62,57);">
 				<img src="/static/img/vamp.svg">
 				<h2>{{"{{totalV}}"}}</h2>
 			</div>
-			<div style="background-color:hsla(120,100%,50%, 0.5);">
+			<div style="background-color:rgb(141,163,54);">
 				<img src="/static/img/wolf.svg">
 				<h2>{{"{{totalW}}"}}</h2>
 			</div>
@@ -26,37 +26,33 @@
 			<h4>{{"{{state}}"}}</h4>
 			<div v-bind:style="dim">
 				<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-					<rect width="100%" height="100%" fill="url(#grid)" />
 					<g v-for="h in humans">
 						<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
-								stroke="blue" fill="blue"
-								fill-opacity="0.5" stroke-opacity="0.8"/>
+									 stroke="black" fill="rgb(42,79,110)"/>
 						<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
 							{{"{{h.c}}"}}
 						</text>
 					</g>
 					<g v-for="v in vamps">
 						<rect v-bind:x="v.X" v-bind:y="v.Y" width="80" height="80"
-								stroke="red" fill="red"
-								fill-opacity="0.5" stroke-opacity="0.8"/>
+									 stroke="black" fill="rgb(170,62,57)"/>
 						<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
 							{{"{{v.c}}"}}
 						</text>
 					</g>
 					<g v-for="w in wolfs">
 						<rect v-bind:x="w.X" v-bind:y="w.Y" width="80" height="80"
-								stroke="green" fill="green"
-								fill-opacity="0.5" stroke-opacity="0.8"/>
+									 stroke="black" fill="rgb(141,163,54)"/>
 						<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
 							{{"{{w.c}}"}}
 						</text>
 					</g>
 					<defs>
-						<pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
-							<rect width="80" height="80" fill="url(#smallGrid)"/>
-							<path d="M 80 0 L 0 0 0 80" fill="none" stroke="gray" stroke-width="1"/>
+						<pattern id="sgrid" width="80" height="80" patternUnits="userSpaceOnUse">
+							<path d="M 80 0 L 0 0 0 80" fill="none" stroke="black" stroke-width="3"/>
 						</pattern>
 					</defs>
+					<rect width="100%" height="100%" fill="url(#sgrid)" stroke-width="3"/>
 					</svg>
 			</div>
 		</div>
