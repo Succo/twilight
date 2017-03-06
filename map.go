@@ -20,6 +20,16 @@ const (
 	vamp
 )
 
+type state int
+
+const (
+	waiting state = iota
+	ready
+	win0
+	win1
+	null
+)
+
 var (
 	ErrMoveToImpCase = errors.New("Attempt to move to case too far")
 	ErrOutOfGrid     = errors.New("Attempt to leave the grid")
@@ -44,7 +54,7 @@ type move struct {
 }
 
 type Map struct {
-	// matrics of all cells
+	// matrices of all cells
 	cells []cell
 	// list of all cells with humans
 	humans []int
@@ -52,6 +62,7 @@ type Map struct {
 	monster [2][]int
 	Rows    int
 	Columns int
+	state   state
 }
 
 func newMap(mapPath string) *Map {
@@ -197,21 +208,24 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 		}
 		affected = append(affected, new)
 		affected = append(affected, old)
-		if isAffected {
-			continue
-		}
-		if new.IsEmpty() {
+		switch {
+		case isAffected:
+			// Nothing happens the unit are effectively deleted
+
+		case new.IsEmpty():
 			// Moves to empty cell
 			new.kind = kind
 			new.Count = mov.count
 			i := m.set(new)
 			m.monster[id] = append(m.monster[id], i)
 			sort.Ints(m.monster[id])
-		} else if new.kind == old.kind {
+
+		case new.kind == old.kind:
 			// Fusion movement
 			new.Count += mov.count
 			m.set(new)
-		} else if new.kind == 0 {
+
+		case new.kind == 0:
 			// Human fight
 			if new.Count > mov.count {
 				// Instant loss
@@ -241,7 +255,8 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 					m.set(new)
 				}
 			}
-		} else {
+		default:
+
 			// Monster fight
 			if float64(new.Count) > 1.5*float64(mov.count) {
 				// Instant loss
@@ -276,7 +291,19 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 			}
 		}
 	}
+	m.updateState()
 	return nil, affected
+}
+
+func (m *Map) updateState() {
+	switch {
+	case len(m.monster[0])+len(m.monster[1]) == 0:
+		m.state = null
+	case len(m.monster[0]) == 0:
+		m.state = win0
+	case len(m.monster[1]) == 0:
+		m.state = win1
+	}
 }
 
 func (m *Map) pprint() {

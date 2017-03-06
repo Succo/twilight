@@ -7,6 +7,7 @@
 	<body>
 	<div id="grid">
 		<p>Welcome to twilight</p>
+		<p>{{"{{state}}"}}</p>
 		<div v-bind:style="dim">
 			<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
 				<rect width="100%" height="100%" fill="url(#grid)" />
@@ -54,6 +55,7 @@
 			humans: {{.Humans}},
 			vamps: {{.Vamps}},
 			wolfs: {{.Wolfs}},
+			state: {{.State}},
 		  }
 		});
 		(function poll(){
@@ -65,7 +67,7 @@
 						grid.humans = data.Humans;
 						grid.vamps = data.Vamps;
 						grid.wolfs  = data.Wolfs;
-						console.log(grid.wolfs)
+						grid.state = data.State;
 						poll()
 					}
 				};

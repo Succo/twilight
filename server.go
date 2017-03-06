@@ -11,15 +11,6 @@ import (
 	"time"
 )
 
-type state int
-
-const (
-	waiting state = iota
-	p1
-	p2
-	ready
-)
-
 type server struct {
 	*Map
 	name [2]string
@@ -53,20 +44,39 @@ func (s *server) run() {
 	done1 := make(chan []cell, 1)
 	go s.runP(con1, 1, ch1, done1)
 
+	s.state = ready
 	var update0, update1 []cell
 	ch0 <- make([]cell, 0)
 	update0 = <-done0
 	ch1 <- update0
 	update1 = <-done1
+	// Play for 50 rounds
 	for i := 0; i < 50; i++ {
 		ch0 <- append(update0, update1...)
 		update0 = <-done0
+		if s.state > ready {
+			break
+		}
 		ch1 <- append(update1, update0...)
 		update1 = <-done1
+		if s.state > ready {
+			break
+		}
+	}
+	close(ch0)
+	close(ch1)
+	switch s.state {
+	case win0:
+		log.Println("Player 0 won")
+	case win1:
+		log.Println("Player 0 won")
+	case null:
+		log.Println("Equality")
 	}
 }
 
 func (s *server) runP(c net.Conn, id int, ch chan []cell, done chan []cell) {
+	defer s.bye(c)
 	// Initialisation stuff
 	reader := bufio.NewReader(c)
 	buf := make([]byte, 10)
@@ -138,6 +148,10 @@ func (s *server) hme(c net.Conn, id int) {
 	c.Write(msg)
 }
 
+func (s *server) bye(c net.Conn) {
+	msg := []byte("BYE")
+	c.Write(msg)
+}
 func (s *server) send_map(c net.Conn) {
 	n := len(s.humans) + len(s.monster[0]) + len(s.monster[1])
 	msg := make([]byte, 4+5*n)

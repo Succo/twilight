@@ -16,7 +16,10 @@ func startWebApp(m *Map) {
 		panic(err.Error())
 	}
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		index.Execute(w, packMap(m))
+		err := index.Execute(w, packMap(m))
+		if err != nil {
+			log.Fatalf(err.Error())
+		}
 	})
 
 	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +36,7 @@ type packed struct {
 	Humans []cell
 	Vamps  []cell
 	Wolfs  []cell
+	State  string
 }
 
 func packMap(m *Map) packed {
@@ -45,6 +49,16 @@ func packMap(m *Map) packed {
 	}
 	for _, i := range m.monster[vamp-1] {
 		p.Vamps = append(p.Vamps, scale(m.cells[i]))
+	}
+	switch m.state {
+	case waiting:
+		p.State = "Waiting"
+	case ready:
+		p.State = "Playing"
+	case win0:
+		p.State = "Player 0 won"
+	case win1:
+		p.State = "Player 1 won"
 	}
 	return p
 }
