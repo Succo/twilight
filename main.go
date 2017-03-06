@@ -14,7 +14,7 @@ var monster int
 
 func init() {
 	flag.StringVar(&mapPath, "map", "", "path to the map to load")
-	flag.BoolVar(&useRand, "rand", false, "use a randomly generated map")
+	flag.BoolVar(&useRand, "rand", false, "use a randomly generated map (or save if randomly generating)")
 	flag.IntVar(&rows, "rows", 10, "total number of rows")
 	flag.IntVar(&columns, "columns", 10, "total number of columns")
 	flag.IntVar(&humans, "humans", 16, "quantity of humans group")
