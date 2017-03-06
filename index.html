@@ -8,15 +8,18 @@
 	<body>
 	<div class="row" id="game">
 		<div id="info" class="col-md-3" style="height:80vh">
-			<p style="height:33%;background-color:hsla(240,100%,50%, 0.5);">
-				{{"{{totalH}}"}}
-			</p>
-			<p style="height:33%;background-color:hsla(0,100%,50%, 0.5);">
-				{{"{{totalV}}"}}
-			</p>
-			<p style="height:33%;background-color:hsla(120,100%,50%, 0.5);">
-				{{"{{totalW}}"}}
-			</p>
+			<div style="background-color:hsla(240,100%,50%, 0.5);">
+				<img src="/static/img/human.svg">
+				<h2>{{"{{totalH}}"}}</h2>
+			</div>
+			<div style="background-color:hsla(0,100%,50%, 0.5);">
+				<img src="/static/img/vamp.svg">
+				<h2>{{"{{totalV}}"}}</h2>
+			</div>
+			<div style="background-color:hsla(120,100%,50%, 0.5);">
+				<img src="/static/img/wolf.svg">
+				<h2>{{"{{totalW}}"}}</h2>
+			</div>
 		</div>
 		<div id="grid" class="col-md-6">
 			<h3>Welcome to twilight</h3>
@@ -107,5 +110,17 @@
 			}, 300);
 		})();
 	</script>
+	<style type="text/css">
+	img{
+		height:60%;
+	}
+	#info div {
+		height:33%;
+		display: flex;
+		flex-direction: row;
+		justify-content: space-around;
+		align-items: center;
+	}
+	</style>
 	</body>
 </html>
