@@ -37,7 +37,7 @@ func generate(filename string, Rows, Columns, humans, monster int) *Map {
 	// Returns a permutation of n integer
 	perm := rand.Perm(m.Columns * m.Rows)
 	// Will crash if human is bigger thant the size of the grid
-	for _, i := range perm[:humans] {
+	for _, i := range perm[:humans/2] {
 		c := m.cells[i]
 		c.Count = 5 + rand.Intn(monster)
 		m.set(c)

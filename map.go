@@ -230,7 +230,6 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 			if hasWon {
 				new.kind = kind
 				new.Count = survivor
-				fmt.Println(survivor)
 				i := m.set(new)
 				m.monster[id] = append(m.monster[id], i)
 				sort.Ints(m.monster[id])
