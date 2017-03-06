@@ -61,7 +61,10 @@ type Map struct {
 	monster [2][]int
 	Rows    int
 	Columns int
-	state   state
+	// total number of moves so far
+	mov int
+	// state i.e. waiting/playing/ended...
+	state state
 }
 
 func newMap(mapPath string) *Map {
@@ -254,6 +257,7 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 		}
 	}
 	m.updateState()
+	m.mov++
 	return nil, affected
 }
 

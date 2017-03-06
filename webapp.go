@@ -37,6 +37,7 @@ type packed struct {
 	Vamps  []cell
 	Wolfs  []cell
 	State  string
+	Mov    int
 }
 
 func packMap(m *Map) packed {
@@ -46,6 +47,7 @@ func packMap(m *Map) packed {
 		Humans: make([]cell, 0),
 		Vamps:  make([]cell, 0),
 		Wolfs:  make([]cell, 0),
+		Mov:    m.mov,
 	}
 	for _, i := range m.humans {
 		p.Humans = append(p.Humans, scale(m.cells[i]))
