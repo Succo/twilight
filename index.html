@@ -61,6 +61,9 @@
 			<h4>{{"{{state}}"}}</h4>
 			<h4>Mouvement {{"{{mov}}"}}</h4>
 			<button v-on:click="playpause">Play</button>
+			<div v-for="i in history.length">
+				<button v-on:click="setState(i)">i</button>
+			</div>
 		</div>
 	</div>
 
@@ -100,6 +103,12 @@
 		  methods: {
 			playpause: function() {
 				this.playing =  !this.playing;
+			},
+			setState: function(i) {
+				this.humans = this.history[i].Humans;
+				this.vamps = this.history[i].Vamps;
+				this.wolfs  = this.history[i].Wolfs;
+				this.state = this.history[i].State;
 			}
 		  }
 		});
@@ -115,8 +124,8 @@
 								game.vamps = data.Vamps;
 								game.wolfs  = data.Wolfs;
 								game.state = data.State;
-								game.mov = data.Mov
 							}
+							game.mov = data.Mov
 							game.history.push(data)
 						}
 						poll()
