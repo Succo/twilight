@@ -64,7 +64,8 @@
 						data = JSON.parse(this.responseText);
 						grid.humans = data.Humans;
 						grid.vamps = data.Vamps;
-						grid.wolf  = data.Wolfs;
+						grid.wolfs  = data.Wolfs;
+						console.log(grid.wolfs)
 						poll()
 					}
 				};

@@ -162,11 +162,9 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 	kind := specie(1 + id)
 	for _, mov := range moves {
 		if mov.oldx < 0 || mov.oldx > m.Columns || mov.oldy < 0 || mov.oldy > m.Rows {
-			fmt.Println("old", mov.oldx, mov.oldy)
 			return ErrOutOfGrid, affected
 		}
 		if mov.newx < 0 || mov.newx > m.Columns || mov.newy < 0 || mov.newy > m.Rows {
-			fmt.Println("new", mov.newx, mov.newy)
 			return ErrOutOfGrid, affected
 		}
 		old := m.get(mov.oldx, mov.oldy)
@@ -257,7 +255,10 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 				} else {
 					P = float64(mov.count)/float64(new.Count) - 0.5
 				}
-				if rand.Float64() > P {
+				if P > 1.0 {
+					P = 1.0
+				}
+				if rand.Float64() < P {
 					// Victory
 					survivor := int(P * (float64(mov.count)))
 					new.kind = kind

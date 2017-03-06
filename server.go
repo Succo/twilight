@@ -212,7 +212,6 @@ func (s *server) upd(reader *bufio.Reader, id int) (err error, update []cell) {
 		return err, update
 	}
 	t := int(buf[0])
-	fmt.Println(t)
 	moves := make([]move, t)
 	for i := 0; i < t; i++ {
 		_, e := io.ReadFull(reader, buf[:5])
@@ -227,7 +226,6 @@ func (s *server) upd(reader *bufio.Reader, id int) (err error, update []cell) {
 			newx:  int(uint(buf[3])),
 			newy:  int(uint(buf[4])),
 		}
-		fmt.Println(moves[i])
 	}
 	if err != nil {
 		return err, update
