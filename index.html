@@ -67,14 +67,16 @@
 					⏯️
 				</button>
 			</div>
-			<table class="table table-striped" style="width:90%;">
-				<tbody>
-					<tr v-for="i in history.length" style="height:1.2em"> 
-						<td v-on:click="setState(i)" role="button">
-							Movement {{"{{i}}"}}
-						</td>
-				</tbody>
-			</table>
+			<div style="width:90%;height:90%;">
+				<table class="table table-striped">
+					<tbody>
+						<tr v-for="i in history.length" style="height:1.2em"> 
+							<td v-on:click="setState(i-1)" role="button">
+								Movement {{"{{i-1}}"}}
+							</td>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 
