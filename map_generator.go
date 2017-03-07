@@ -28,13 +28,17 @@ func generate(filename string, Rows, Columns, humans, monster int) *Map {
 	}
 	// get a symetrie function
 	var f func(x, y, rows, columns int) (int, int)
-	switch rand.Intn(3) {
-	case 0:
+	if Rows == Columns {
+		switch rand.Intn(3) {
+		case 0:
+			f = axial
+		case 1:
+			f = center
+		case 2:
+			f = diagonal
+		}
+	} else {
 		f = axial
-	case 1:
-		f = center
-	case 2:
-		f = diagonal
 	}
 	// Returns a permutation of n integer
 	perm := rand.Perm(m.Columns * m.Rows)
@@ -64,6 +68,9 @@ func generate(filename string, Rows, Columns, humans, monster int) *Map {
 		symX, symY := f(c.X, c.Y, m.Rows, m.Columns)
 		if symX != c.X || symY != c.Y {
 			break
+		} else {
+			i = rand.Intn(m.Columns * m.Rows)
+			c = m.cells[i]
 		}
 	}
 	c.Count = monster
@@ -117,7 +124,7 @@ func diagonal(X, Y int, rows, columns int) (int, int) {
 	return Y, X
 }
 func center(X, Y int, rows, columns int) (int, int) {
-	return rows - 1 - Y, columns - 1 - X
+	return rows - 1 - X, columns - 1 - Y
 }
 func axial(X, Y int, rows, columns int) (int, int) {
 	return X, rows - 1 - Y
