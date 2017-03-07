@@ -67,7 +67,7 @@
 					⏯️
 				</button>
 			</div>
-			<div style="width:90%;height:90%;">
+			<div style="width:90%;height:90vh;overflow:auto;margin-top:3px">
 				<table class="table table-striped">
 					<tbody>
 						<tr v-for="i in history.length" style="height:1.2em"> 
@@ -79,6 +79,7 @@
 			</div>
 		</div>
 	</div>
+	</body>
 
 	<script>
 		var game = new Vue({
@@ -162,5 +163,4 @@
 		align-items: center;
 	}
 	</style>
-	</body>
 </html>
