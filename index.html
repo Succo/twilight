@@ -25,21 +25,21 @@
 		<div id="grid" class="col-md-6">
 			<div v-bind:style="dim">
 				<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-					<g v-for="h in humans">
+					<g v-for="h in history[idx].Humans">
 						<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
 									 stroke="black" fill="rgb(42,79,110)"/>
 						<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
 							{{"{{h.c}}"}}
 						</text>
 					</g>
-					<g v-for="v in vamps">
+					<g v-for="v in history[idx].Vamps">
 						<rect v-bind:x="v.X" v-bind:y="v.Y" width="80" height="80"
 									 stroke="black" fill="rgb(170,62,57)"/>
 						<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
 							{{"{{v.c}}"}}
 						</text>
 					</g>
-					<g v-for="w in wolfs">
+					<g v-for="w in history[idx].Wolfs">
 						<rect v-bind:x="w.X" v-bind:y="w.Y" width="80" height="80"
 									 stroke="black" fill="rgb(141,163,54)"/>
 						<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
@@ -60,8 +60,8 @@
 			<h3>Welcome to twilight</h3>
 			<div style="display: flex;justify-content:space-around">
 				<div >
-					<h4>{{"{{state}}"}}</h4>
-					<h4>Mouvement {{"{{mov}}"}}</h4>
+					<h4>{{"{{history[idx].state}}"}}</h4>
+					<h4>Mouvement {{"{{history[idx].mov}}"}}</h4>
 				</div>
 				<button class="btn btn-default" v-on:click="playpause">
 					⏯️
@@ -89,32 +89,29 @@
 				width: {{.X}} + 'px',
 				height: {{.Y}} + 'px',
 			},
-			humans: {{.Humans}},
-			vamps: {{.Vamps}},
-			wolfs: {{.Wolfs}},
-			state: {{.State}},
-			mov: {{.Mov}},
 			history: [{
-				humans: {{.Humans}},
-				vamps: {{.Vamps}},
-				wolfs: {{.Wolfs}},
-				state: {{.State}},
+				Humans: {{.Humans}},
+				Vamps: {{.Vamps}},
+				Wolfs: {{.Wolfs}},
+				State: {{.State}},
+				Mov: {{.Mov}},
 			}],
+			idx: 0,
 			playing: true,
 		  },
 		  computed: {
 			  totalH: function() {
-				  return this.humans.reduce(function(acc, val) {
+				  return this.history[this.idx].Humans.reduce(function(acc, val) {
 					  return acc + val.c
 				  }, 0);
 			  },
 			  totalV: function() {
-				  return this.vamps.reduce(function(acc, val) {
+				  return this.history[this.idx].Vamps.reduce(function(acc, val) {
 					  return acc + val.c
 				  }, 0);
 			  },
 			  totalW: function() {
-				  return this.wolfs.reduce(function(acc, val) {
+				  return this.history[this.idx].Wolfs.reduce(function(acc, val) {
 					  return acc + val.c
 				  }, 0);
 			  },
@@ -125,10 +122,7 @@
 			},
 			setState: function(i) {
 				this.playing = false;
-				this.humans = this.history[i].Humans;
-				this.vamps = this.history[i].Vamps;
-				this.wolfs  = this.history[i].Wolfs;
-				this.state = this.history[i].State;
+				this.idx = i
 			}
 		  }
 		});
@@ -140,14 +134,10 @@
 						data = JSON.parse(this.responseText);
 						if (data.length > 0) {
 							i = data.length-1
-							if (game.playing) {
-								game.humans = data[i].Humans;
-								game.vamps = data[i].Vamps;
-								game.wolfs  = data[i].Wolfs;
-								game.state = data[i].State;
-							}
-							game.mov = data[i].Mov
 							game.history = game.history.concat(data)
+							if (game.playing) {
+								game.idx = game.history.length-1;
+							}
 						}
 						poll()
 					}
