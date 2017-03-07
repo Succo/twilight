@@ -94,7 +94,12 @@
 			wolfs: {{.Wolfs}},
 			state: {{.State}},
 			mov: {{.Mov}},
-			history: [],
+			history: [{
+				humans: {{.Humans}},
+				vamps: {{.Vamps}},
+				wolfs: {{.Wolfs}},
+				state: {{.State}},
+			}],
 			playing: true,
 		  },
 		  computed: {
@@ -133,20 +138,21 @@
 				xhttp.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						data = JSON.parse(this.responseText);
-						if (data.Mov > game.mov) {
+						if (data.length > 0) {
+							i = data.length-1
 							if (game.playing) {
-								game.humans = data.Humans;
-								game.vamps = data.Vamps;
-								game.wolfs  = data.Wolfs;
-								game.state = data.State;
+								game.humans = data[i].Humans;
+								game.vamps = data[i].Vamps;
+								game.wolfs  = data[i].Wolfs;
+								game.state = data[i].State;
 							}
-							game.mov = data.Mov
-							game.history.push(data)
+							game.mov = data[i].Mov
+							game.history = game.history.concat(data)
 						}
 						poll()
 					}
 				};
-				xhttp.open("GET", "/data", true);
+				xhttp.open("GET", "/data?mov="+game.history.length, true);
 				xhttp.send();
 			}, 300);
 		})();

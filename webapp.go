@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func startWebApp(m *Map) {
@@ -24,7 +25,14 @@ func startWebApp(m *Map) {
 
 	http.HandleFunc("/data", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(packMap(m))
+		mov := r.FormValue("mov")
+		var offset int
+		offset, _ = strconv.Atoi(mov)
+		if offset > len(m.history) {
+			// Just return empty
+			json.NewEncoder(w).Encode([]int{})
+		}
+		json.NewEncoder(w).Encode(m.history[offset:])
 	})
 
 	log.Println("Web server running on http://localhost:8080")

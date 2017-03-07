@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -68,7 +67,7 @@ type Map struct {
 	// state i.e. waiting/playing/ended...
 	state state
 	// history list of json of the state of the game
-	history []string
+	history []packed
 }
 
 func newMap(mapPath string) *Map {
@@ -291,11 +290,7 @@ func (m *Map) updateState() {
 }
 
 func (m *Map) updateHistory() {
-	encoded, err := json.Marshal(packMap(m))
-	if err != nil {
-		panic(err)
-	}
-	m.history = append(m.history, string(encoded))
+	m.history = append(m.history, packMap(m))
 }
 
 func (m *Map) pprint() {
