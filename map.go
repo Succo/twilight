@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -66,6 +67,8 @@ type Map struct {
 	mov int
 	// state i.e. waiting/playing/ended...
 	state state
+	// history list of json of the state of the game
+	history []string
 }
 
 func newMap(mapPath string) *Map {
@@ -173,6 +176,7 @@ func (m *Map) set(c cell) (index int) {
 }
 
 func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
+	defer m.updateHistory()
 	log.Printf("===== Movement %d, %d units", m.mov, len(moves))
 	kind := specie(1 + id)
 	for _, mov := range moves {
@@ -284,6 +288,14 @@ func (m *Map) updateState() {
 	case len(m.monster[1]) == 0:
 		m.state = win1
 	}
+}
+
+func (m *Map) updateHistory() {
+	encoded, err := json.Marshal(packMap(m))
+	if err != nil {
+		panic(err)
+	}
+	m.history = append(m.history, string(encoded))
 }
 
 func (m *Map) pprint() {

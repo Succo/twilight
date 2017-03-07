@@ -35,6 +35,7 @@ func main() {
 	} else {
 		m = generate(mapPath, rows, columns, humans, monster)
 	}
+	m.updateHistory()
 	s := server{m, names}
 	go s.run()
 	startWebApp(s.Map)
