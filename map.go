@@ -53,6 +53,44 @@ type move struct {
 	count                  int
 }
 
+type moveSorter []move
+
+func (s moveSorter) Len() int {
+	return len(s)
+}
+
+func (s moveSorter) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+func (s moveSorter) Less(i, j int) bool {
+	switch {
+	case s[i].oldx > s[j].oldx:
+		return false
+	case s[i].oldx < s[j].oldx:
+		return true
+	}
+	switch {
+	case s[i].oldy > s[j].oldy:
+		return false
+	case s[i].oldy < s[j].oldy:
+		return true
+	}
+	switch {
+	case s[i].newx > s[j].newx:
+		return false
+	case s[i].newx < s[j].oldy:
+		return true
+	}
+	switch {
+	case s[i].newy > s[j].newy:
+		return false
+	case s[i].newy < s[j].oldy:
+		return true
+	}
+	return true
+}
+
 type Map struct {
 	// matrices of all cells
 	cells []cell
@@ -177,8 +215,9 @@ func (m *Map) set(c cell) (index int) {
 func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 	defer m.updateHistory()
 	log.Printf("===== Movement %d, %d units", m.mov, len(moves))
+	sort.Sort(moveSorter(moves))
 	kind := specie(1 + id)
-	for _, mov := range moves {
+	for idx, mov := range moves {
 		//  Error checking for all moves
 		if mov.oldx < 0 || mov.oldx > m.Columns || mov.oldy < 0 || mov.oldy > m.Rows {
 			return ErrOutOfGrid, affected
@@ -195,8 +234,16 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 			return ErrMoveWrongKind, affected
 		}
 		if old.Count < mov.count {
+			fmt.Println(old.Count, mov.count)
 			return ErrMoveTooMany, affected
 		}
+		// Before checking for affected, merge common moves
+		if idx+1 < len(moves) && same_move(mov, moves[idx+1]) {
+			fmt.Println("Merged")
+			moves[idx+1].count += mov.count
+			continue
+		}
+
 		// Remove the units from the previous cell
 		old.Count -= mov.count
 		i := m.set(old)
@@ -320,6 +367,10 @@ func (m *Map) reload(update []cell) (reloaded []cell) {
 
 func isNeighbour(c1, c2 cell) bool {
 	return abs(c1.X-c2.X) <= 1 && abs(c1.Y-c2.Y) <= 1 && !(c1.X == c2.X && c1.Y == c2.Y)
+}
+
+func same_move(m1, m2 move) bool {
+	return m1.oldx == m2.oldx && m1.oldy == m2.oldy && m1.newx == m2.newx && m1.newy == m2.newy
 }
 
 func abs(n int) int {
