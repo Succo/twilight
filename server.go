@@ -234,11 +234,12 @@ func (s *server) upd(reader *bufio.Reader, id int) (err error, update []cell) {
 			continue
 		}
 		moves[i] = move{
-			oldx:  int(uint(buf[0])),
-			oldy:  int(uint(buf[1])),
-			count: int(uint(buf[2])),
-			newx:  int(uint(buf[3])),
-			newy:  int(uint(buf[4])),
+			oldx:      int(uint(buf[0])),
+			oldy:      int(uint(buf[1])),
+			count:     int(uint(buf[2])),
+			effective: int(uint(buf[2])),
+			newx:      int(uint(buf[3])),
+			newy:      int(uint(buf[4])),
 		}
 	}
 	if err != nil {

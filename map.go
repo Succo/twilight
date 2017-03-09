@@ -50,7 +50,11 @@ func (c cell) IsEmpty() bool {
 
 type move struct {
 	oldx, oldy, newx, newy int
-	count                  int
+	// count is the number of units leaving the cell
+	count int
+	// effective is the number of unit effectively arriving
+	// used to merge mouvements from two different cells into one
+	effective int
 }
 
 type moveSorter []move
@@ -65,18 +69,6 @@ func (s moveSorter) Swap(i, j int) {
 
 func (s moveSorter) Less(i, j int) bool {
 	switch {
-	case s[i].oldx > s[j].oldx:
-		return false
-	case s[i].oldx < s[j].oldx:
-		return true
-	}
-	switch {
-	case s[i].oldy > s[j].oldy:
-		return false
-	case s[i].oldy < s[j].oldy:
-		return true
-	}
-	switch {
 	case s[i].newx > s[j].newx:
 		return false
 	case s[i].newx < s[j].oldy:
@@ -86,6 +78,18 @@ func (s moveSorter) Less(i, j int) bool {
 	case s[i].newy > s[j].newy:
 		return false
 	case s[i].newy < s[j].oldy:
+		return true
+	}
+	switch {
+	case s[i].oldx > s[j].oldx:
+		return false
+	case s[i].oldx < s[j].oldx:
+		return true
+	}
+	switch {
+	case s[i].oldy > s[j].oldy:
+		return false
+	case s[i].oldy < s[j].oldy:
 		return true
 	}
 	return true
@@ -212,35 +216,38 @@ func (m *Map) set(c cell) (index int) {
 	return index
 }
 
-func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
+func (m *Map) apply(moves []move, id int) (err error, updated []cell) {
 	defer m.updateHistory()
+	var affected []cell
 	log.Printf("===== Movement %d, %d units", m.mov, len(moves))
+	// Moves are sorted, (sort order, arrival cell, and then starting cell)
+	// Allows merging of moves linearly
 	sort.Sort(moveSorter(moves))
 	kind := specie(1 + id)
 	for idx, mov := range moves {
 		//  Error checking for all moves
 		if mov.oldx < 0 || mov.oldx > m.Columns || mov.oldy < 0 || mov.oldy > m.Rows {
-			return ErrOutOfGrid, affected
+			return ErrOutOfGrid, updated
 		}
 		if mov.newx < 0 || mov.newx > m.Columns || mov.newy < 0 || mov.newy > m.Rows {
-			return ErrOutOfGrid, affected
+			return ErrOutOfGrid, updated
 		}
 		old := m.get(mov.oldx, mov.oldy)
 		new := m.get(mov.newx, mov.newy)
 		if !isNeighbour(old, new) {
-			return ErrMoveToImpCase, affected
+			return ErrMoveToImpCase, updated
 		}
 		if old.kind != kind {
-			return ErrMoveWrongKind, affected
+			return ErrMoveWrongKind, updated
 		}
 		if old.Count < mov.count {
 			fmt.Println(old.Count, mov.count)
-			return ErrMoveTooMany, affected
+			return ErrMoveTooMany, updated
 		}
 		// Before checking for affected, merge common moves
 		if idx+1 < len(moves) && same_move(mov, moves[idx+1]) {
-			fmt.Println("Merged")
 			moves[idx+1].count += mov.count
+			moves[idx+1].effective += mov.effective
 			continue
 		}
 
@@ -265,8 +272,17 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 				break
 			}
 		}
-		affected = append(affected, new)
+		// List of cells that are updated
+		updated = append(updated, new, old)
+		// List of cell in which it's forbidden to arrive (i.e from which units moved)
 		affected = append(affected, old)
+
+		// If the next move arrives in the same plave, add this unit to it
+		if idx+1 < len(moves) && same_arrival(mov, moves[idx+1]) {
+			moves[idx+1].effective += mov.effective
+			continue
+		}
+
 		switch {
 		case isAffected:
 			// Nothing happens the unit are effectively deleted
@@ -275,7 +291,7 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 		case new.IsEmpty():
 			// Moves to empty cell
 			new.kind = kind
-			new.Count = mov.count
+			new.Count = mov.effective
 			i := m.set(new)
 			m.monster[id] = append(m.monster[id], i)
 			sort.Ints(m.monster[id])
@@ -283,13 +299,13 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 
 		case new.kind == old.kind:
 			// Fusion movement
-			new.Count += mov.count
+			new.Count += mov.effective
 			m.set(new)
 			log.Println("Merging two groups into a cell")
 
 		case new.kind == 0:
 			// Human fight
-			survivor, hasWon := simulateHumanFight(mov.count, new.Count)
+			survivor, hasWon := simulateHumanFight(mov.effective, new.Count)
 			if hasWon {
 				new.kind = kind
 				new.Count = survivor
@@ -304,7 +320,7 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 				log.Println("Human survived, units deleted")
 			}
 		default:
-			survivor, hasWon := simulateMonsterFight(mov.count, new.Count)
+			survivor, hasWon := simulateMonsterFight(mov.effective, new.Count)
 			if hasWon {
 				new.kind = kind
 				new.Count = survivor
@@ -322,7 +338,7 @@ func (m *Map) apply(moves []move, id int) (err error, affected []cell) {
 	}
 	m.updateState()
 	m.mov++
-	return nil, affected
+	return nil, updated
 }
 
 func (m *Map) updateState() {
@@ -371,6 +387,10 @@ func isNeighbour(c1, c2 cell) bool {
 
 func same_move(m1, m2 move) bool {
 	return m1.oldx == m2.oldx && m1.oldy == m2.oldy && m1.newx == m2.newx && m1.newy == m2.newy
+}
+
+func same_arrival(m1, m2 move) bool {
+	return m1.newx == m2.newx && m1.newy == m2.newy
 }
 
 func abs(n int) int {
