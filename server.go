@@ -82,7 +82,7 @@ func (s *server) runP(c net.Conn, id int, ch chan []cell, done chan []cell) {
 	buf := make([]byte, 10)
 	io.ReadFull(reader, buf[:4])
 	if bytes.Compare(buf[:3], []byte("NME")) != 0 {
-		fmt.Errorf("Invalid first connexion value")
+		panic("Invalid first connexion value")
 		return
 	}
 
