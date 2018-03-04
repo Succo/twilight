@@ -18,7 +18,7 @@ type server struct {
 
 func (s *server) run() {
 	log.Println("Starting tcp server")
-	l, err := net.Listen("tcp", ":9000")
+	l, err := net.Listen("tcp", ":5555")
 	defer l.Close()
 	if err != nil {
 		panic(err.Error())
@@ -82,7 +82,7 @@ func (s *server) runP(c net.Conn, id int, ch chan []cell, done chan []cell) {
 	buf := make([]byte, 10)
 	io.ReadFull(reader, buf[:4])
 	if bytes.Compare(buf[:3], []byte("NME")) != 0 {
-		log.Printf("[Error] Invalid first connexion value. Expected NME.")
+		panic("Invalid first connexion value")
 		return
 	}
 
