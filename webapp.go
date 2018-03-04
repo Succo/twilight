@@ -40,7 +40,7 @@ func startWebApp(m *Map) {
 }
 
 type packed struct {
-	X, Y   int
+	R, C   int
 	Humans []cell
 	Vamps  []cell
 	Wolfs  []cell
@@ -50,21 +50,21 @@ type packed struct {
 
 func packMap(m *Map) packed {
 	p := packed{
-		X:      m.Columns*80 + 1,
-		Y:      m.Rows*80 + 1,
-		Humans: make([]cell, 0),
-		Vamps:  make([]cell, 0),
-		Wolfs:  make([]cell, 0),
+		C:      m.Columns,
+		R:      m.Rows,
+		Humans: []cell{},
+		Vamps:  []cell{},
+		Wolfs:  []cell{},
 		Mov:    m.mov,
 	}
 	for _, i := range m.humans {
-		p.Humans = append(p.Humans, scale(m.cells[i]))
+		p.Humans = append(p.Humans, m.cells[i])
 	}
 	for _, i := range m.monster[wolf-1] {
-		p.Wolfs = append(p.Wolfs, scale(m.cells[i]))
+		p.Wolfs = append(p.Wolfs, m.cells[i])
 	}
 	for _, i := range m.monster[vamp-1] {
-		p.Vamps = append(p.Vamps, scale(m.cells[i]))
+		p.Vamps = append(p.Vamps, m.cells[i])
 	}
 	switch m.state {
 	case waiting:
@@ -77,10 +77,4 @@ func packMap(m *Map) packed {
 		p.State = "Player 1 won"
 	}
 	return p
-}
-
-func scale(c cell) cell {
-	c.X = c.X * 80
-	c.Y = c.Y * 80
-	return c
 }

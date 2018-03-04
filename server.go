@@ -207,6 +207,7 @@ func (s *server) send_upd(c net.Conn, update []cell) {
 			msg[4+5*i+3] = byte(uint8(cl.Count))
 		}
 	}
+	time.Sleep(time.Second)
 	c.Write(msg)
 }
 
