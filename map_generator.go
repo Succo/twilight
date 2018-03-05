@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"sort"
@@ -14,8 +15,15 @@ import (
 // generate a random map of size Rows x Columns
 // with humans being half the number of group of humans (for symetrie)
 // and monsters being the number of monster
-func generate(filename string, Rows, Columns, humans, monster int) *Map {
-	rand.Seed(time.Now().UnixNano())
+func generate(filename string, Rows, Columns, humans, monster int, seed int64) *Map {
+	if seed == 0 {
+		randomSeed := time.Now().UnixNano()
+		rand.Seed(randomSeed)
+		log.Println("Generated Seed %d\n", randomSeed)
+	} else {
+		rand.Seed(seed)
+		log.Println("Using Seed %d\n", seed)
+	}
 	m := &Map{Rows: Rows, Columns: Columns}
 	m.cells = make([]cell, m.Columns*m.Rows)
 	var i int

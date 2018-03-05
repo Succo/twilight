@@ -69,7 +69,7 @@ func (s *server) run() {
 	case win0:
 		log.Println("Player 0 won")
 	case win1:
-		log.Println("Player 0 won")
+		log.Println("Player 1 won")
 	case null:
 		log.Println("Equality")
 	}
@@ -207,7 +207,7 @@ func (s *server) send_upd(c net.Conn, update []cell) {
 			msg[4+5*i+3] = byte(uint8(cl.Count))
 		}
 	}
-	time.Sleep(time.Second)
+	// time.Sleep(time.Second)
 	c.Write(msg)
 }
 
