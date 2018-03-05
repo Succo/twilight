@@ -13,7 +13,7 @@ import (
 
 type server struct {
 	*Map
-	name [2]string
+	// name [2]string
 }
 
 func (s *server) run() {
@@ -91,12 +91,12 @@ func (s *server) runP(c net.Conn, id int, ch chan []cell, done chan []cell) {
 		buf = make([]byte, t)
 	}
 	io.ReadFull(reader, buf[:t])
-	s.name[id] = string(buf[:t])
+	s.Map.name[id] = string(buf[:t])
 	s.set(c)
 	s.hum(c)
 	s.hme(c, id)
 	s.send_map(c)
-	log.Printf("Initialisation finished for player %d", id)
+	log.Printf("Initialisation finished for player %d (%s)", id, s.Map.name[id])
 	s.send_upd(c, make([]cell, 0))
 
 	// First round

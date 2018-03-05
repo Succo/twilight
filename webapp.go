@@ -40,22 +40,26 @@ func startWebApp(m *Map) {
 }
 
 type packed struct {
-	R, C   int
-	Humans []cell
-	Vamps  []cell
-	Wolfs  []cell
-	State  string
-	Mov    int
+	R, C     int
+	Humans   []cell
+	Vamps    []cell
+	Wolfs    []cell
+	State    string
+	Mov      int
+	VampName string
+	WolfName string
 }
 
 func packMap(m *Map) packed {
 	p := packed{
-		C:      m.Columns,
-		R:      m.Rows,
-		Humans: []cell{},
-		Vamps:  []cell{},
-		Wolfs:  []cell{},
-		Mov:    m.mov,
+		C:        m.Columns,
+		R:        m.Rows,
+		Humans:   []cell{},
+		Vamps:    []cell{},
+		Wolfs:    []cell{},
+		Mov:      m.mov,
+		WolfName: m.name[0],
+		VampName: m.name[1],
 	}
 	for _, i := range m.humans {
 		p.Humans = append(p.Humans, m.cells[i])

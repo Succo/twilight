@@ -5,7 +5,7 @@
 	<script src="/static/js/vue.min.js"></script>
 	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
 	</head>
-	<body style="max-height: 100%; width: 100%; height: 100%; padding: 0; margin: 0;" 
+	<body style="max-height: 100%; width: 100%; height: 100%; padding: 0; margin: 0;"
 	>
 	<div id="game" style="max-height: 100%; width: 100%; height: 100%; padding: 0; margin: 0; display: flex;">
 		<div id="info" style="height: 100%; width: 90px; display: flex; flex-direction: column; padding: 0; margin: 0;">
@@ -16,10 +16,12 @@
 			<div style="background-color:rgb(170,62,57); display: flex; justify-content: space-around; flex-direction: column; flex: 1; align-items:center">
 				<img src="/static/img/vamp.svg" style="max-width:100%">
 				<h2>{{"{{totalV}}"}}</h2>
+				<p>{{"{{names.Vamps}}"}}</p>
 			</div>
 			<div style="background-color:rgb(141,163,54); display: flex; justify-content: space-around; flex-direction: column; flex: 1; align-items:center">
 				<img src="/static/img/wolf.svg" style="max-width:100%">
 				<h2>{{"{{totalW}}"}}</h2>
+				<p>{{"{{names.Wolfs}}"}}</p>
 			</div>
 		</div>
 
@@ -92,7 +94,7 @@
 	<script>
 		var R = parseInt("{{.R}}", 10), C = parseInt("{{.C}}", 10);
 		var game;
-		document.addEventListener("DOMContentLoaded", function(event) { 
+		document.addEventListener("DOMContentLoaded", function(event) {
 			game = new Vue({
 				el: '#game',
 				data: {
@@ -105,6 +107,10 @@
 					}],
 					idx: 0,
 					playing: true,
+					names: {
+						Vamps: "{{.VampName}}",
+						Wolfs: "{{.WolfName}}",
+					},
 				},
 				computed: {
 					tileWidth: function() {
@@ -174,13 +180,13 @@
 			})();
 
 			window.addEventListener('keydown', function(event) {
-				if (event.keyCode === 13 || event.keyCode === 40 || event.keyCode === 32) { 
+				if (event.keyCode === 13 || event.keyCode === 40 || event.keyCode === 32) {
 					game.nextIdx();
 				} else if (event.keyCode === 38) {
 					game.prevIdx();
 				}
 			});
-		}); 
+		});
 	</script>
 	<style type="text/css">
 	tr.active {
