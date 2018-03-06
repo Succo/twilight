@@ -19,10 +19,10 @@ func generate(filename string, Rows, Columns, humans, monster int, seed int64) *
 	if seed == 0 {
 		randomSeed := time.Now().UnixNano()
 		rand.Seed(randomSeed)
-		log.Println("Generated Seed %d\n", randomSeed)
+		log.Printf("Generated Seed %d\n", randomSeed)
 	} else {
 		rand.Seed(seed)
-		log.Println("Using Seed %d\n", seed)
+		log.Printf("Using Seed %d\n", seed)
 	}
 	m := &Map{Rows: Rows, Columns: Columns}
 	m.cells = make([]cell, m.Columns*m.Rows)
