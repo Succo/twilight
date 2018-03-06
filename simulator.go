@@ -48,9 +48,6 @@ func simulateHumanFight(E1, E2 int) (survivor int, victory bool) {
 
 // getProba reimplements the getProba logic from Board.cs in the C# implementation
 func getProba(E1, E2 int, involveHumans bool) float64 {
-	if E1 == E2 {
-		return 0.5
-	}
 	var cste float64
 	if involveHumans {
 		cste = 1
