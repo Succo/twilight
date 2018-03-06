@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strconv"
 
-	"launchpad.net/xmlpath"
+	"gopkg.in/xmlpath.v1"
 )
 
 type specie int
@@ -110,6 +110,8 @@ type Map struct {
 	state state
 	// history list of json of the state of the game
 	history []packed
+
+	name [2]string
 }
 
 func newMap(mapPath string) *Map {

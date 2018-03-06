@@ -25,7 +25,6 @@ func init() {
 
 func main() {
 	flag.Parse()
-	var names [2]string
 	var m *Map
 	if !useRand && seed == 0 {
 		if mapPath != "" {
@@ -38,7 +37,7 @@ func main() {
 		m = generate(mapPath, rows, columns, humans, monster, seed)
 	}
 	m.updateHistory()
-	s := server{m, names}
+	s := server{m}
 	go s.run()
 	startWebApp(s.Map)
 }
