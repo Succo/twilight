@@ -72,6 +72,6 @@ func getProba(E1, E2 int, involveHumans bool) float64 {
 		y0 = 1
 		m := (y0 - y1) / (x0 - x1)
 		c := 1 - m*x0
-		return m*float64(E2) + c
+		return m*float64(E1) + c
 	}
 }
