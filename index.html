@@ -166,7 +166,7 @@
 							data = JSON.parse(this.responseText);
 							if (data.length > 0) {
 								i = data.length-1
-								game.history = game.history.concat(data)
+								game.history = data
 								if (game.playing) {
 									game.idx = game.history.length-1;
 								}
@@ -174,7 +174,7 @@
 							poll()
 						}
 					};
-					xhttp.open("GET", "/data?mov="+game.history.length, true);
+					xhttp.open("GET", "/data", true);
 					xhttp.send();
 				}, 300);
 			})();
