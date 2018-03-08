@@ -18,7 +18,7 @@ type server struct {
 
 func (s *server) run() {
 	log.Println("Starting tcp server")
-	l, err := net.Listen("tcp", ":5555")
+	l, err := net.Listen("tcp", "0.0.0.0:9000")
 	defer l.Close()
 	if err != nil {
 		panic(err.Error())

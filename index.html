@@ -30,21 +30,21 @@
 				<svg v-bind:width="gridWidth" v-bind:height="gridHeight" xmlns="http://www.w3.org/2000/svg">
 					<g v-for="h in history[idx].Humans">
 						<rect v-bind:x="h.X*tileWidth" v-bind:y="h.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
-									 stroke="black" fill="rgb(42,79,110)"/>
+									stroke="none" fill="rgb(42,79,110)"/>
 						<text v-bind:x="h.X*tileWidth+tileWidth/4" v-bind:y="h.Y*tileWidth+tileWidth/2">
 							{{"{{h.c}}"}}
 						</text>
 					</g>
 					<g v-for="v in history[idx].Vamps">
 						<rect v-bind:x="v.X*tileWidth" v-bind:y="v.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
-									 stroke="black" fill="rgb(170,62,57)"/>
+									 stroke="none" fill="rgb(170,62,57)"/>
 						<text v-bind:x="v.X*tileWidth+tileWidth/4" v-bind:y="v.Y*tileWidth+tileWidth/2">
 							{{"{{v.c}}"}}
 						</text>
 					</g>
 					<g v-for="w in history[idx].Wolfs">
 						<rect v-bind:x="w.X*tileWidth" v-bind:y="w.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
-									 stroke="black" fill="rgb(141,163,54)"/>
+									stroke="none" fill="rgb(141,163,54)"/>
 						<text v-bind:x="w.X*tileWidth+tileWidth/4" v-bind:y="w.Y*tileWidth+tileWidth/2">
 							{{"{{w.c}}"}}
 						</text>
@@ -54,6 +54,7 @@
 							<path v-bind:d="'M '+tileWidth+' 0 L 0 0 0 '+tileWidth" fill="none" stroke="black" stroke-width="3"/>
 						</pattern>
 					</defs>
+					<rect width="100%" height="100%" stroke="black" stroke-width="3" fill="url(#sgrid)"/>
 				</svg>
 			</div>
 		</div>
