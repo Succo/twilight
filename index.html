@@ -30,9 +30,9 @@
 				<svg v-bind:width="gridWidth" v-bind:height="gridHeight" xmlns="http://www.w3.org/2000/svg">
 					<g v-for="h in history[idx].Humans">
 						<rect v-bind:x="h.X*tileWidth" v-bind:y="h.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
-									stroke="none" fill="rgb(42,79,110)"/>
+									stroke="none" v-bind:fill="(h.c)?'rgb(42,79,110)':'none'"/>
 						<text v-bind:x="h.X*tileWidth+tileWidth/4" v-bind:y="h.Y*tileWidth+tileWidth/2">
-							{{"{{h.c}}"}}
+							{{"{{(h.c)?h.c:''}}"}}
 						</text>
 					</g>
 					<g v-for="v in history[idx].Vamps">
