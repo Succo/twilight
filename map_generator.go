@@ -68,7 +68,7 @@ func generate(filename string, Rows, Columns, humans, monster int, seed int64) *
 	}
 	sort.Ints(m.humans)
 	// Random starter cell
-	i = rand.Intn(m.Columns * m.Rows)
+	i = perm[humans/2 + 1]
 	c := m.cells[i]
 	// Make sure that the random cell we picked isn't it's own symetrique
 	// otherwise we won't get any ennemies
