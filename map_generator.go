@@ -74,7 +74,6 @@ func generate(filename string, Rows, Columns, humans, monster int, seed int64) *
 	i = perm[humans/2+cnt]
 
 	c := m.cells[i]
-	log.Printf("%d %d", c.X, c.Y)
 	// Make sure that the random cell we picked isn't it's own symetrique
 	// otherwise we won't get any ennemies
 	for {
