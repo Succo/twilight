@@ -1,4 +1,4 @@
-## Serveur de jeux pour Vampires VS Werewolves
+## Serveur de jeux pour Vampires VS Werewolves
 
 Ce serveur a vocation à pouvoir servir à la place de l'officiel, et vise donc une compatibilité maximum du point de vue des IA (joueurs).
 Par contre, il est plutôt implémenté dans un optique de débug : il essaie donc d'offrir le plus d'infos pertinentes aux utilisateurs, et n'implémente pas strictement les règles en cas de mal fonctionnement de l'IA (type non réponse). 
@@ -15,6 +15,8 @@ Usage of twilight:
     	quantity of monster in the start case (default 8)
   -rand
     	use a randomly generated map
+  -seed int
+      use seed to generate same map
   -rows int
     	total number of rows (default 10)
 ```
