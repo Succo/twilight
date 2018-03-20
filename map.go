@@ -220,7 +220,7 @@ func (m *Map) set(c cell) (index int) {
 
 func (m *Map) apply(moves []move, id int) (err error, updated []cell) {
 	defer m.updateHistory()
-	var affected []cell
+
 	log.Printf("===== Movement %d, %d units", m.mov, len(moves))
 	// Moves are sorted, (sort order, arrival cell, and then starting cell)
 	// Allows merging of moves linearly
@@ -246,7 +246,7 @@ func (m *Map) apply(moves []move, id int) (err error, updated []cell) {
 			fmt.Println(old.Count, mov.count)
 			return ErrMoveTooMany, updated
 		}
-		// Before checking for affected, merge common moves
+
 		if idx+1 < len(moves) && same_move(mov, moves[idx+1]) {
 			moves[idx+1].count += mov.count
 			moves[idx+1].effective += mov.effective
@@ -260,24 +260,8 @@ func (m *Map) apply(moves []move, id int) (err error, updated []cell) {
 			m.monster[id] = remove(m.monster[id], i)
 		}
 
-		// check for cell already used in this move
-		var isAffected bool
-		for _, c := range affected {
-			if c.X == new.X && c.Y == new.Y {
-				isAffected = true
-				empty := cell{
-					X: c.X,
-					Y: c.Y,
-				}
-				i := m.set(empty)
-				m.monster[id] = remove(m.monster[id], i)
-				break
-			}
-		}
 		// List of cells that are updated
 		updated = append(updated, new, old)
-		// List of cell in which it's forbidden to arrive (i.e from which units moved)
-		affected = append(affected, old)
 
 		// If the next move arrives in the same plave, add this unit to it
 		if idx+1 < len(moves) && same_arrival(mov, moves[idx+1]) {
@@ -286,10 +270,6 @@ func (m *Map) apply(moves []move, id int) (err error, updated []cell) {
 		}
 
 		switch {
-		case isAffected:
-			// Nothing happens the unit are effectively deleted
-			log.Println("Destroying units going into affected cell")
-
 		case new.IsEmpty():
 			// Moves to empty cell
 			new.kind = kind
