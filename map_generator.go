@@ -5,6 +5,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"log"
 	"math/rand"
 	"os"
 	"sort"
@@ -14,8 +15,15 @@ import (
 // generate a random map of size Rows x Columns
 // with humans being half the number of group of humans (for symetrie)
 // and monsters being the number of monster
-func generate(filename string, Rows, Columns, humans, monster int) *Map {
-	rand.Seed(time.Now().UnixNano())
+func generate(filename string, Rows, Columns, humans, monster int, seed int64) *Map {
+	if seed == 0 {
+		randomSeed := time.Now().UnixNano()
+		rand.Seed(randomSeed)
+		log.Printf("Generated Seed %d\n", randomSeed)
+	} else {
+		rand.Seed(seed)
+		log.Printf("Using Seed %d\n", seed)
+	}
 	m := &Map{Rows: Rows, Columns: Columns}
 	m.cells = make([]cell, m.Columns*m.Rows)
 	var i int
@@ -60,16 +68,31 @@ func generate(filename string, Rows, Columns, humans, monster int) *Map {
 	}
 	sort.Ints(m.humans)
 	// Random starter cell
-	i = rand.Intn(m.Columns * m.Rows)
+	var cnt int
+	cnt = 1
+
+	i = perm[humans/2+cnt]
+
 	c := m.cells[i]
 	// Make sure that the random cell we picked isn't it's own symetrique
 	// otherwise we won't get any ennemies
 	for {
+		// loop over the human position to check if the positions is free
+		var free_cell bool
+		free_cell = true
+		for _, idx := range m.humans {
+			if i == idx {
+				free_cell = false
+			}
+		}
+		// check the symmetry
 		symX, symY := f(c.X, c.Y, m.Rows, m.Columns)
-		if symX != c.X || symY != c.Y {
+		if (symX != c.X || symY != c.Y) && free_cell {
 			break
 		} else {
-			i = rand.Intn(m.Columns * m.Rows)
+			// pick the next random permuted integer
+			cnt = cnt + 1
+			i = perm[humans/2+cnt]
 			c = m.cells[i]
 		}
 	}

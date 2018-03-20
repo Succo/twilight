@@ -1,78 +1,89 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="max-height: 100%; width: 100%; height: 100%; padding: 0; margin: 0;">
 	<head>
 	<meta charset="utf-8">
 	<script src="/static/js/vue.min.js"></script>
 	<link rel="stylesheet" href="/static/css/bootstrap.min.css">
 	</head>
-	<body>
-	<div class="row" id="game">
-		<div id="info" class="col-md-3" style="height:80vh">
-			<div style="background-color:rgb(42,79,110);">
-				<img src="/static/img/human.svg">
+	<body style="max-height: 100%; width: 100%; height: 100%; padding: 0; margin: 0;"
+	>
+	<div id="game" style="max-height: 100%; width: 100%; height: 100%; padding: 0; margin: 0; display: flex;">
+		<div id="info" style="height: 100%; width: 90px; display: flex; flex-direction: column; padding: 0; margin: 0;">
+			<div style="background-color:rgb(42,79,110); display: flex; justify-content: space-around; flex-direction: column; flex: 1; align-items:center">
+				<img src="/static/img/human.svg" style="max-width:100%">
 				<h2>{{"{{totalH}}"}}</h2>
 			</div>
-			<div style="background-color:rgb(170,62,57);">
-				<img src="/static/img/vamp.svg">
+			<div style="background-color:rgb(170,62,57); display: flex; justify-content: space-around; flex-direction: column; flex: 1; align-items:center">
+				<img src="/static/img/vamp.svg" style="max-width:100%">
 				<h2>{{"{{totalV}}"}}</h2>
+				<p>{{"{{names.Vamps}}"}}</p>
 			</div>
-			<div style="background-color:rgb(141,163,54);">
-				<img src="/static/img/wolf.svg">
+			<div style="background-color:rgb(141,163,54); display: flex; justify-content: space-around; flex-direction: column; flex: 1; align-items:center">
+				<img src="/static/img/wolf.svg" style="max-width:100%">
 				<h2>{{"{{totalW}}"}}</h2>
+				<p>{{"{{names.Wolfs}}"}}</p>
 			</div>
 		</div>
 
-		<div id="grid" class="col-md-6">
-			<div v-bind:style="dim">
-				<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+		<div id="grid" style="flex: 1; max-height: 100%;">
+			<div id="gridContainer" style="max-width:100%; max-height:100%; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+				<svg v-bind:width="gridWidth" v-bind:height="gridHeight" xmlns="http://www.w3.org/2000/svg">
 					<g v-for="h in history[idx].Humans">
-						<rect v-bind:x="h.X" v-bind:y="h.Y" width="80" height="80"
-									 stroke="black" fill="rgb(42,79,110)"/>
-						<text v-bind:x="h.X+20" v-bind:y="h.Y+40">
-							{{"{{h.c}}"}}
+						<rect v-bind:x="h.X*tileWidth" v-bind:y="h.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
+									stroke="none" v-bind:fill="(h.c)?'rgb(42,79,110)':'none'"/>
+						<text v-bind:x="h.X*tileWidth+tileWidth/4" v-bind:y="h.Y*tileWidth+tileWidth/2">
+							{{"{{(h.c)?h.c:''}}"}}
 						</text>
 					</g>
 					<g v-for="v in history[idx].Vamps">
-						<rect v-bind:x="v.X" v-bind:y="v.Y" width="80" height="80"
-									 stroke="black" fill="rgb(170,62,57)"/>
-						<text v-bind:x="v.X+20" v-bind:y="v.Y+40">
+						<rect v-bind:x="v.X*tileWidth" v-bind:y="v.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
+									 stroke="none" fill="rgb(170,62,57)"/>
+						<text v-bind:x="v.X*tileWidth+tileWidth/4" v-bind:y="v.Y*tileWidth+tileWidth/2">
 							{{"{{v.c}}"}}
 						</text>
 					</g>
 					<g v-for="w in history[idx].Wolfs">
-						<rect v-bind:x="w.X" v-bind:y="w.Y" width="80" height="80"
-									 stroke="black" fill="rgb(141,163,54)"/>
-						<text v-bind:x="w.X+20" v-bind:y="w.Y+40">
+						<rect v-bind:x="w.X*tileWidth" v-bind:y="w.Y*tileWidth" v-bind:width="tileWidth" v-bind:height="tileWidth"
+									stroke="none" fill="rgb(141,163,54)"/>
+						<text v-bind:x="w.X*tileWidth+tileWidth/4" v-bind:y="w.Y*tileWidth+tileWidth/2">
 							{{"{{w.c}}"}}
 						</text>
 					</g>
 					<defs>
-						<pattern id="sgrid" width="80" height="80" patternUnits="userSpaceOnUse">
-							<path d="M 80 0 L 0 0 0 80" fill="none" stroke="black" stroke-width="3"/>
+						<pattern id="sgrid" v-bind:width="tileWidth" v-bind:height="tileWidth" patternUnits="userSpaceOnUse">
+							<path v-bind:d="'M '+tileWidth+' 0 L 0 0 0 '+tileWidth" fill="none" stroke="black" stroke-width="3"/>
 						</pattern>
 					</defs>
-					<rect width="100%" height="100%" fill="url(#sgrid)" stroke-width="3"/>
-					</svg>
+					<rect width="100%" height="100%" stroke="black" stroke-width="3" fill="url(#sgrid)"/>
+				</svg>
 			</div>
 		</div>
 
-		<div  class="col-md-3">
-			<h3>Welcome to twilight</h3>
+		<div  style="
+		width: 250px;
+		height:  100%;
+		max-height:  100%;
+		display: flex;
+		flex-direction: column;
+		border-left: black solid 1px;
+		">
+			<h3 style="text-align: center">Moves</h3>
 			<div style="display: flex;justify-content:space-around">
 				<div >
-					<h4>{{"{{history[idx].state}}"}}</h4>
-					<h4>Mouvement {{"{{history[idx].mov}}"}}</h4>
+					<h4>{{"{{history[idx].State}}"}}</h4>
+					<h4>Current {{"{{idx+1}}"}}</h4>
 				</div>
 				<button class="btn btn-default" v-on:click="playpause">
-					⏯️
+					<span v-if="playing">⏸</span>
+					<span v-else>▶️</span>
 				</button>
 			</div>
-			<div style="width:90%;height:90vh;overflow:auto;margin-top:3px">
-				<table class="table table-striped">
+			<div style="overflow-y: auto; margin-top: 3px; max-height: 100%; flex: 1;">
+				<table class="table">
 					<tbody>
-						<tr v-for="i in history.length" style="height:1.2em"> 
-							<td v-on:click="setState(i-1)" role="button">
-								Movement {{"{{i-1}}"}}
+						<tr v-for="i in history.length" style="height:1.2em" v-bind:class="{active: ((i-1)===idx)}">
+							<td v-on:click="selectIdx(i-1)" role="button">
+								Move {{"{{i}}"}}
 							</td>
 					</tbody>
 				</table>
@@ -82,81 +93,105 @@
 	</body>
 
 	<script>
-		var game = new Vue({
-		  el: '#game',
-		  data: {
-			dim: {
-				width: {{.X}} + 'px',
-				height: {{.Y}} + 'px',
-			},
-			history: [{
-				Humans: {{.Humans}},
-				Vamps: {{.Vamps}},
-				Wolfs: {{.Wolfs}},
-				State: {{.State}},
-				Mov: {{.Mov}},
-			}],
-			idx: 0,
-			playing: true,
-		  },
-		  computed: {
-			  totalH: function() {
-				  return this.history[this.idx].Humans.reduce(function(acc, val) {
-					  return acc + val.c
-				  }, 0);
-			  },
-			  totalV: function() {
-				  return this.history[this.idx].Vamps.reduce(function(acc, val) {
-					  return acc + val.c
-				  }, 0);
-			  },
-			  totalW: function() {
-				  return this.history[this.idx].Wolfs.reduce(function(acc, val) {
-					  return acc + val.c
-				  }, 0);
-			  },
-		  },
-		  methods: {
-			playpause: function() {
-				this.playing =  !this.playing;
-			},
-			setState: function(i) {
-				this.playing = false;
-				this.idx = i
-			}
-		  }
-		});
-		(function poll(){
-			setTimeout(function(){
-				var xhttp = new XMLHttpRequest();
-				xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						data = JSON.parse(this.responseText);
-						if (data.length > 0) {
-							i = data.length-1
-							game.history = game.history.concat(data)
-							if (game.playing) {
-								game.idx = game.history.length-1;
-							}
-						}
-						poll()
+		var R = parseInt("{{.R}}", 10), C = parseInt("{{.C}}", 10);
+		var game;
+		document.addEventListener("DOMContentLoaded", function(event) {
+			game = new Vue({
+				el: '#game',
+				data: {
+					history: [{
+						Humans: {{.Humans}},
+						Vamps: {{.Vamps}},
+						Wolfs: {{.Wolfs}},
+						State: "{{.State}}",
+						Mov: parseInt("{{.Mov}}", 10)
+					}],
+					idx: 0,
+					playing: true,
+					names: {
+						Vamps: "{{.VampName}}",
+						Wolfs: "{{.WolfName}}",
+					},
+				},
+				computed: {
+					tileWidth: function() {
+						var e = document.getElementById("gridContainer");
+						var w = e.clientWidth, h = e.clientHeight;
+						return Math.min(w / C, h / R)-6;
+					},
+					gridWidth: function () {
+						return this.tileWidth*C;
+					},
+					gridHeight: function () {
+						return this.tileWidth*R;
+					},
+					totalH: function() {
+						return this.history[this.idx].Humans.reduce(function(acc, val) {
+							return acc + val.c
+						}, 0);
+					},
+					totalV: function() {
+						return this.history[this.idx].Vamps.reduce(function(acc, val) {
+							return acc + val.c
+						}, 0);
+					},
+					totalW: function() {
+						return this.history[this.idx].Wolfs.reduce(function(acc, val) {
+							return acc + val.c
+						}, 0);
+					},
+				},
+				methods: {
+					playpause: function() {
+						game.playing = !game.playing;
+					},
+					selectIdx: function(i) {
+						game.playing = false;
+						game.idx = i;
+					},
+					nextIdx: function() {
+						game.playing = false;
+						game.idx = Math.min(this.history.length-1, game.idx+1);
+					},
+					prevIdx: function() {
+						game.playing = false;
+						game.idx = Math.max(0, game.idx-1);
 					}
-				};
-				xhttp.open("GET", "/data?mov="+game.history.length, true);
-				xhttp.send();
-			}, 300);
-		})();
+				}
+			});
+			(function poll(){
+				setTimeout(function(){
+					var xhttp = new XMLHttpRequest();
+					xhttp.onreadystatechange = function() {
+						if (this.readyState == 4 && this.status == 200) {
+							data = JSON.parse(this.responseText);
+							if (data.length > 0) {
+								i = data.length-1
+								game.history = data
+								if (game.playing) {
+									game.idx = game.history.length-1;
+								}
+							}
+							poll()
+						}
+					};
+					xhttp.open("GET", "/data", true);
+					xhttp.send();
+				}, 300);
+			})();
+
+			window.addEventListener('keydown', function(event) {
+				if (event.keyCode === 13 || event.keyCode === 40 || event.keyCode === 32) {
+					game.nextIdx();
+				} else if (event.keyCode === 38) {
+					game.prevIdx();
+				}
+			});
+		});
 	</script>
 	<style type="text/css">
-	img{
-		height:60%;
-	}
-	#info div {
-		height:33%;
-		display: flex;
-		flex-direction: row;
-		justify-content: space-around;
-		align-items: center;
+	tr.active {
+		background-color: #c1e7e3;
 	}
 	</style>
 </html>

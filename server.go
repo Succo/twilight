@@ -13,12 +13,12 @@ import (
 
 type server struct {
 	*Map
-	name [2]string
+	// name [2]string
 }
 
 func (s *server) run() {
 	log.Println("Starting tcp server")
-	l, err := net.Listen("tcp", ":5555")
+	l, err := net.Listen("tcp", "0.0.0.0:9000")
 	defer l.Close()
 	if err != nil {
 		panic(err.Error())
@@ -69,7 +69,7 @@ func (s *server) run() {
 	case win0:
 		log.Println("Player 0 won")
 	case win1:
-		log.Println("Player 0 won")
+		log.Println("Player 1 won")
 	case null:
 		log.Println("Equality")
 	}
@@ -91,12 +91,12 @@ func (s *server) runP(c net.Conn, id int, ch chan []cell, done chan []cell) {
 		buf = make([]byte, t)
 	}
 	io.ReadFull(reader, buf[:t])
-	s.name[id] = string(buf[:t])
+	s.Map.name[id] = string(buf[:t])
 	s.set(c)
 	s.hum(c)
 	s.hme(c, id)
 	s.send_map(c)
-	log.Printf("Initialisation finished for player %d", id)
+	log.Printf("Initialisation finished for player %d (%s)", id, s.Map.name[id])
 	s.send_upd(c, make([]cell, 0))
 
 	// First round
@@ -207,6 +207,7 @@ func (s *server) send_upd(c net.Conn, update []cell) {
 			msg[4+5*i+3] = byte(uint8(cl.Count))
 		}
 	}
+	// time.Sleep(time.Second)
 	c.Write(msg)
 }
 
