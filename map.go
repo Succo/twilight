@@ -263,7 +263,6 @@ func (m *Map) apply(moves []move, id int) (err error, updated []cell) {
 		// List of cells that are updated
 		updated = append(updated, new, old)
 
-
 		// If the next move arrives in the same plave, add this unit to it
 		if idx+1 < len(moves) && same_arrival(mov, moves[idx+1]) {
 			moves[idx+1].effective += mov.effective
