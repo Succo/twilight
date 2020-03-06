@@ -1,26 +1,48 @@
-## Serveur de jeux pour Vampire VS Werewolf
+# Unofficial game server for Vampires vs. Werewolves
 
-Ce serveur à vocation à pouvoir servir à la place de l'officiel et vise donc une compatibilité maximune du point de vue des IA (joueurs).
-Par contre il est plus implémenter dans un optique de débug, il essaie donc d'offrir le plus d'info pertinentes au utilisateurs, et n'implémentes pas strictement les rêgles en cas de mal fonctionnement de l'IA (type non réponse). 
+## Context
+This game has been designed for a final-year school assignment (CentraleSupélec). 
+The main idea is: 2 species (Vampires and Werewolves) are divided into groups and are fighting against each other on a discrete map.
+If interested, rules can be found in the source code.
 
-```
-Usage of twilight:
-  -columns int
-    	total number of columns (default 10)
-  -humans int
-    	quantity of humans group (default 16)
-  -map string
-    	path to the map to load (or save if randomly generating)
-  -monster int
-    	quantity of monster in the start case (default 8)
-  -rand
+The assignment is to build the best AI to play this game.
+
+## Server
+
+This server can replace the official server (only available on Windows) and ensures maximum compatibility from the player's point of view. 
+You'll also find more debug information than on the original server. 
+
+Note that it doesn't stricly follow the official rules, especially if your AI is not behaving as expected.
+
+### Parameters
+
+List of required parameters (one or the other):
+  - `-map <string>`
+    	path to the map you want to load (or save to if randomly generated)
+  - `-rand`
     	use a randomly generated map
-  -rows int
+
+List of optional parameters:
+  - `-columns <int>`
+    	total number of columns (default: 10)
+  - `-humans <int>`
+    	number of human groups (default: 16)
+  - `-monster <int>`
+    	number of monsters in the start cell (default: 8)
+  - `-rows <int>`
     	total number of rows (default 10)
+
+Like the official server, player connect on port 5555. For debugging purposes, a Vue.js UI is available and served on port 8080.
+
+The simulation code is the same as the original one, translated into Go, so it should be right. But there might still be some errors that you're welcome to fix.
+
+## Setup
+
+The server uses a go back-end. To ensure easy developement on your environment, a Dockerfile is available.
+
+### Using Docker
+
 ```
-
-Comme avec le serveur officiel les bot se connectent sur le port 5555.
-La visualisation de la partie peut se faire sur navigateur à http://localhost:8080/.
-Pour des raisons de gain de temps, vue.js a été utilisé pour le rendu réactif du front.
-
-Le code pour les simulations est un copié collé de celui d'origine re-écrit en go, il devrait donc être correcte.
+docker build -t "twilight" .
+docker run -p 8080:8080 -p 5555:5555 twilight
+```
